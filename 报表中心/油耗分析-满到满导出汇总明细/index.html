@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>油耗分析 · 满到满「长周期汇总 + 去重明细」导出 — 技术要点</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #fff;
+      --text: #1a1d21;
+      --muted: #5c6370;
+      --accent: #2563eb;
+      --border: #e2e6ec;
+      --ok: #059669;
+      --warn: #d97706;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      padding: 28px 20px 48px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    header .meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    header .meta a { color: var(--accent); }
+    .nav-demo {
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+    .nav-demo a { color: var(--accent); font-weight: 600; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    section h2 {
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+    }
+    .lead {
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .lead strong { color: var(--ok); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f0f4fa; font-weight: 600; }
+    .diagram {
+      font-size: 0.85rem;
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      line-height: 1.5;
+    }
+    .diagram .tree { color: var(--muted); margin-bottom: 10px; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .block {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+    .block:last-child { margin-bottom: 0; }
+    .block h3 { font-size: 0.8rem; color: var(--accent); margin-bottom: 6px; }
+    .block p { font-size: 0.82rem; color: var(--text); }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .tag {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .tag.warn { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+    ul { margin: 8px 0 0 18px; font-size: 0.88rem; }
+    li { margin-bottom: 6px; }
+    .check { color: var(--ok); font-weight: 600; }
+    .cross { color: #b91c1c; font-weight: 600; }
+    footer {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>油耗分析 · 满到满「导出选中明细」技术要点</h1>
+    <p class="meta">
+      一页纸便于截图评审 · 详细规则见
+      <a href="./油耗分析满到满导出汇总明细-PRD-v1.0.md">PRD v1.0（含 v1.5 修订）</a>
+      · 报表中心
+    </p>
+  </header>
+
+  <p class="nav-demo">
+    交互示意（浏览器里像 Excel 一个 Sheet）：<a href="./满到满导出效果演示.html">满到满导出效果演示.html</a>
+  </p>
+
+  <section>
+    <h2>1. 本次新增导出「是什么」</h2>
+    <p class="lead">
+      Excel <strong>仅两块</strong>：<strong>长周期汇总（按车牌 1 行）</strong> + <strong>去重后的加油明细</strong>。
+      <strong>不</strong>再附带与现网「导出选中」相同的<strong>逐段满到满主表</strong>（避免重复）。
+    </p>
+    <div class="tags">
+      <span class="tag">模块：油耗分析 → 满到满</span>
+      <span class="tag">入口：导出菜单新增（如「导出选中明细」）</span>
+      <span class="tag warn">上限：勾选 ≤500 条主表行</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Excel 结构（与车辆运营报表「主表 + 明细」类似）</h2>
+    <div class="diagram">
+      <div class="tree">工作簿 &gt; Sheet「示例：沪A12345」· 每车牌一个 Sheet（命名需处理非法字符）</div>
+      <div class="block">
+        <h3>表头 A · 长周期汇总</h3>
+        <p>仅 <strong>1 行</strong>数据。列 = 当前油耗模式下满到满列表字段（聚合规则见 PRD 5.3）。</p>
+      </div>
+      <div class="block">
+        <h3>表头 B · 加油明细</h3>
+        <p>多行。去重键：<strong>在途费用编号</strong>。排序：加油时间升序（同秒顺序不限）。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. 聚合与去重（研发必看）</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>规则</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>汇总分组键</td>
+          <td><strong>仅车牌号</strong>。同一 Sheet 内汇总区<strong>永远 1 行</strong>（该车牌本次勾选的全部满到满段聚合）。</td>
+        </tr>
+        <tr>
+          <td>司机列</td>
+          <td>多司机：姓名 <strong>去重</strong>，用英文逗号 <code>,</code> 拼接；<strong>拼接顺序</strong>以 PRD 第 5.3 节聚合说明表（产品定稿）为准。</td>
+        </tr>
+        <tr>
+          <td>明细去重</td>
+          <td>键：<strong>在途费用编号</strong>。各段明细并集后 <code>distinct</code>。</td>
+        </tr>
+        <tr>
+          <td>明细排序</td>
+          <td>加油时间升序；同一秒多条顺序<strong>任意</strong>。</td>
+        </tr>
+        <tr>
+          <td>字段聚合</td>
+          <td>分段 / 按车·按单圈 <strong>两套列</strong>，每列求和·最小·最大·重算等见 PRD 第 5.3 节表（产品确认中）。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>4. 与现网导出关系</h2>
+    <table>
+      <thead>
+        <tr><th>能力</th><th>内容</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>原「导出选中」</td>
+          <td><span class="check">保持</span>：逐段满到满主表，<strong>不含</strong>本需求的长周期汇总与去重明细块。</td>
+        </tr>
+        <tr>
+          <td>本「导出选中明细」</td>
+          <td><span class="check">仅</span>长周期 1 行 + 明细；<span class="cross">不含</span>N 行逐段主表。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>5. 校验与降级</h2>
+    <ul>
+      <li>勾选 <strong>&gt;500</strong>：提示，不导出。</li>
+      <li>未勾选：提示，不导出。</li>
+      <li><strong>M1可选</strong>：多车牌勾选禁止 → 提示分次导出（若本期不做多 Sheet）。</li>
+      <li>不要求「同车必须同司机」；仍按车牌合成一行。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>6. 验收摘要（可对照 PRD 第六节）</h2>
+    <ul>
+      <li>同车牌勾选 N 段：汇总区 <strong>仅 1 行</strong>，无 N 行逐段主表。</li>
+      <li>明细无重复在途费用编号；多司机时司机列英文逗号拼接。</li>
+      <li>多车牌（若做）：每车牌独立 Sheet，结构同上。</li>
+    </ul>
+  </section>
+
+  <footer>
+    财运通 CYT · 产品说明页 · 本地打开即可截图 </footer>
+</body>
+</html>

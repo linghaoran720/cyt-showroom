@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>识别结果 - 单个运单 - 财运通</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+* { box-sizing: border-box; }
+body { font-family: 'PingFang SC','Microsoft YaHei',sans-serif; background:#F2F3F5; margin:0; min-width:1280px; }
+.top-nav { height:48px; background:#2B2B6E; position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; padding:0 16px; gap:0; }
+.top-nav .logo { color:#fff; font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px; padding-right:16px; border-right:1px solid rgba(255,255,255,0.15); }
+.top-nav .logo-icon { background:rgba(255,255,255,0.2); border-radius:6px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-size:13px; }
+.top-nav .nav-tab { color:rgba(255,255,255,0.7); padding:0 16px; height:48px; display:flex; align-items:center; font-size:14px; cursor:pointer; position:relative; }
+.top-nav .nav-tab.active { color:#fff; }
+.top-nav .nav-tab.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:#fff; }
+.top-nav .right-area { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.btn-create-waybill { background:#00B42A; color:#fff; border:none; border-radius:4px; padding:4px 12px; font-size:13px; cursor:pointer; }
+.avatar { width:28px; height:28px; border-radius:50%; background:#5B5FC7; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; }
+.sidebar { width:160px; background:#fff; position:fixed; top:48px; left:0; bottom:0; border-right:1px solid #E5E6EB; z-index:90; }
+.menu-item { padding:10px 16px; display:flex; align-items:center; gap:8px; font-size:14px; color:#4E5969; cursor:pointer; }
+.menu-item.active { color:#5B5FC7; font-weight:500; background:#F0F0FF; border-left:3px solid #5B5FC7; padding-left:13px; }
+.submenu-item { padding:8px 16px 8px 32px; font-size:13px; color:#4E5969; cursor:pointer; display:flex; align-items:center; gap:6px; }
+.submenu-item.active { color:#5B5FC7; font-weight:500; background:#F0F0FF; }
+.submenu-item::before { content:''; width:4px; height:4px; border-radius:50%; background:#C9CDD4; }
+.submenu-item.active::before { background:#5B5FC7; }
+
+.main { margin-left:160px; margin-top:48px; height:calc(100vh - 48px); display:flex; flex-direction:column; }
+
+/* 顶部面包屑 */
+.result-header { background:#fff; padding:12px 24px; border-bottom:1px solid #E5E6EB; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.breadcrumb-area { display:flex; align-items:center; gap:8px; font-size:14px; color:#86909C; }
+.breadcrumb-area .current { color:#1D2129; font-weight:500; }
+.breadcrumb-area i { font-size:12px; }
+.header-actions { display:flex; align-items:center; gap:10px; }
+
+/* 左右分屏 */
+.split-container { display:flex; flex:1; overflow:hidden; }
+
+/* 左侧：原始内容 */
+.left-panel { width:380px; flex-shrink:0; background:#fff; border-right:1px solid #E5E6EB; display:flex; flex-direction:column; overflow:hidden; }
+.panel-title { padding:14px 20px; font-size:14px; font-weight:600; color:#1D2129; border-bottom:1px solid #E5E6EB; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.panel-title .badge { font-size:11px; background:#E8F3FF; color:#165DFF; padding:2px 8px; border-radius:10px; font-weight:400; }
+.left-content { flex:1; overflow-y:auto; padding:16px 20px; }
+
+/* 图片展示 */
+.img-preview-block { margin-bottom:16px; }
+.img-preview-label { font-size:12px; color:#86909C; margin-bottom:8px; }
+.img-preview-item { border:1px solid #E5E6EB; border-radius:6px; overflow:hidden; cursor:pointer; position:relative; }
+.img-preview-item img { width:100%; display:block; }
+.img-placeholder { background:#F7F8FA; height:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#86909C; gap:8px; font-size:13px; }
+.img-placeholder i { font-size:36px; color:#C9CDD4; }
+.img-zoom-hint { position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.5); color:#fff; font-size:11px; padding:2px 8px; border-radius:4px; }
+
+/* 补充信息 */
+.supplement-block { background:#F7F8FA; border-radius:6px; padding:12px; margin-top:8px; }
+.supplement-block .label { font-size:12px; color:#86909C; margin-bottom:6px; }
+.supplement-block .content { font-size:13px; color:#4E5969; line-height:1.6; }
+
+/* 右侧：识别结果 */
+.right-panel { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.right-content { flex:1; overflow-y:auto; padding:20px 24px; }
+
+/* 识别字段列表 */
+.field-list { }
+.field-item { display:grid; grid-template-columns:140px 180px 1fr; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid #F2F3F5; }
+.field-item:last-child { border-bottom:none; }
+.field-name { font-size:14px; color:#4E5969; display:flex; align-items:center; gap:6px; }
+.field-name .conf-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.conf-high { background:#00B42A; }
+.conf-mid { background:#FF7D00; }
+.conf-low { background:#C9CDD4; }
+.field-map { position:relative; }
+.field-map select { width:100%; height:30px; border:1px solid #E5E6EB; border-radius:4px; font-size:13px; color:#1D2129; padding:0 28px 0 10px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%2386909C' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 8px center; appearance:none; cursor:pointer; }
+.field-map select:focus { outline:none; border-color:#165DFF; }
+.field-map .clear-btn { position:absolute; right:24px; top:50%; transform:translateY(-50%); color:#C9CDD4; cursor:pointer; font-size:14px; display:none; }
+.field-map:hover .clear-btn { display:block; }
+.field-value { }
+.field-value input { width:100%; height:30px; border:1px solid #E5E6EB; border-radius:4px; font-size:13px; color:#1D2129; padding:0 10px; }
+.field-value input:focus { outline:none; border-color:#165DFF; }
+.field-value input.unmapped { background:#FFF9F0; border-color:#FFD591; color:#86909C; }
+.field-value input.unmapped::placeholder { color:#C9CDD4; }
+
+/* 字段分组标题 */
+.field-group-title { font-size:13px; font-weight:600; color:#86909C; padding:14px 0 6px; text-transform:uppercase; letter-spacing:0.5px; }
+
+/* 底部操作 */
+.right-footer { padding:16px 24px; background:#fff; border-top:1px solid #E5E6EB; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.right-footer .tip { font-size:13px; color:#86909C; display:flex; align-items:center; gap:6px; }
+.right-footer .actions { display:flex; gap:10px; }
+.btn-primary-cyt { background:#165DFF; color:#fff; border:none; border-radius:4px; height:32px; padding:0 20px; font-size:14px; cursor:pointer; }
+.btn-primary-cyt:hover { background:#4080FF; }
+.btn-secondary-cyt { background:#fff; color:#4E5969; border:1px solid #E5E6EB; border-radius:4px; height:32px; padding:0 16px; font-size:14px; cursor:pointer; }
+.btn-secondary-cyt:hover { border-color:#165DFF; color:#165DFF; }
+
+/* 冲突弹窗 */
+.modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.3); z-index:200; align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; }
+.modal-box { background:#fff; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.12); width:480px; }
+.modal-header { padding:16px 24px; border-bottom:1px solid #E5E6EB; display:flex; align-items:center; justify-content:space-between; }
+.modal-header h5 { font-size:16px; font-weight:600; color:#1D2129; margin:0; }
+.modal-close { background:none; border:none; color:#86909C; cursor:pointer; font-size:20px; }
+.modal-body { padding:20px 24px; }
+.modal-footer { padding:16px 24px; border-top:1px solid #E5E6EB; display:flex; justify-content:flex-end; gap:12px; }
+.conflict-info { background:#FFF9F0; border:1px solid #FFD591; border-radius:6px; padding:14px 16px; margin-bottom:16px; }
+.conflict-info .row-item { display:flex; align-items:center; gap:8px; font-size:14px; color:#4E5969; margin-bottom:6px; }
+.conflict-info .row-item:last-child { margin-bottom:0; }
+.conflict-info .arrow { color:#86909C; }
+.radio-group { display:flex; flex-direction:column; gap:10px; }
+.radio-item { display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
+.radio-item input { margin-top:3px; accent-color:#165DFF; }
+.radio-item .label { font-size:14px; color:#1D2129; }
+.radio-item .desc { font-size:12px; color:#86909C; margin-top:2px; }
+
+/* 成功提示 */
+.toast-success { position:fixed; top:72px; right:24px; background:#fff; border:1px solid #E5E6EB; border-radius:8px; padding:14px 20px; box-shadow:0 4px 16px rgba(0,0,0,0.1); display:none; align-items:center; gap:10px; z-index:300; font-size:14px; color:#1D2129; }
+.toast-success.show { display:flex; }
+.toast-success i { color:#00B42A; font-size:20px; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<nav class="top-nav">
+  <div class="logo"><div class="logo-icon">G</div>财运通</div>
+  <div style="display:flex;align-items:center;margin-left:12px;">
+    <div class="nav-tab">首页</div>
+    <div class="nav-tab active">运单管理</div>
+    <div class="nav-tab">调度中心</div>
+  </div>
+  <div class="right-area">
+    <button class="btn-create-waybill">✦ 创建运单</button>
+    <i class="bi bi-bell" style="color:rgba(255,255,255,0.7);font-size:18px;"></i>
+    <div class="avatar">李</div>
+  </div>
+</nav>
+
+<!-- 左侧菜单 -->
+<aside class="sidebar">
+  <div style="padding:12px;border-bottom:1px solid #F2F3F5;display:flex;align-items:center;gap:8px;">
+    <div class="avatar" style="width:36px;height:36px;font-size:14px;">李</div>
+    <div><div style="font-size:13px;font-weight:500;color:#1D2129;">李调度</div><div style="font-size:12px;color:#86909C;">浩瀚物流</div></div>
+  </div>
+  <div class="menu-item active"><i class="bi bi-file-text"></i> 运单管理</div>
+  <div class="submenu-item">运单列表</div>
+  <div class="submenu-item active">创建运单</div>
+  <div class="menu-item"><i class="bi bi-truck"></i> 调度中心</div>
+  <div class="menu-item"><i class="bi bi-geo-alt"></i> 在途管理</div>
+</aside>
+
+<main class="main">
+  <!-- 顶部面包屑 -->
+  <div class="result-header">
+    <div class="breadcrumb-area">
+      <a href="index.html" style="color:#165DFF;text-decoration:none;">创建运单</a>
+      <i class="bi bi-chevron-right"></i>
+      <span class="current">智能识别结果</span>
+      <span style="margin-left:8px;" class="badge" style="background:#E8F3FF;color:#165DFF;font-size:12px;padding:2px 8px;border-radius:10px;">单个运单</span>
+    </div>
+    <div class="header-actions">
+      <span style="font-size:13px;color:#86909C;"><i class="bi bi-stars" style="color:#165DFF;"></i> AI 识别完成，请确认字段映射</span>
+    </div>
+  </div>
+
+  <!-- 左右分屏 -->
+  <div class="split-container">
+
+    <!-- 左侧：原始内容 -->
+    <div class="left-panel">
+      <div class="panel-title">
+        <i class="bi bi-image" style="color:#165DFF;"></i>
+        原始内容
+        <span class="badge">只读</span>
+      </div>
+      <div class="left-content">
+        <div class="img-preview-block">
+          <div class="img-preview-label">图片 1</div>
+          <div class="img-preview-item" onclick="zoomImg()">
+            <div class="img-placeholder">
+              <i class="bi bi-file-image"></i>
+              <span>运单图片（示意）</span>
+              <span style="font-size:11px;">点击放大查看</span>
+            </div>
+            <div class="img-zoom-hint"><i class="bi bi-zoom-in"></i> 放大</div>
+          </div>
+        </div>
+        <div class="img-preview-block">
+          <div class="img-preview-label">图片 2（磅单）</div>
+          <div class="img-preview-item" onclick="zoomImg()">
+            <div class="img-placeholder" style="height:120px;">
+              <i class="bi bi-file-image"></i>
+              <span>磅单图片（示意）</span>
+            </div>
+            <div class="img-zoom-hint"><i class="bi bi-zoom-in"></i> 放大</div>
+          </div>
+        </div>
+        <div class="supplement-block">
+          <div class="label"><i class="bi bi-chat-text"></i> 补充信息</div>
+          <div class="content">司机：张三<br>挂车：京B99999<br>副驾：李四</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：识别结果 -->
+    <div class="right-panel">
+      <div class="right-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="font-size:14px;font-weight:600;color:#1D2129;">识别结果</div>
+          <div style="font-size:13px;color:#86909C;">
+            <span style="color:#00B42A;"><i class="bi bi-circle-fill" style="font-size:8px;"></i> 高置信度</span>
+            <span style="margin:0 8px;color:#FF7D00;"><i class="bi bi-circle-fill" style="font-size:8px;"></i> 中置信度</span>
+            <span style="color:#C9CDD4;"><i class="bi bi-circle-fill" style="font-size:8px;"></i> 需手动选择</span>
+          </div>
+        </div>
+
+        <!-- 表头 -->
+        <div style="display:grid;grid-template-columns:140px 180px 1fr;gap:12px;padding:8px 0;border-bottom:2px solid #E5E6EB;margin-bottom:4px;">
+          <div style="font-size:13px;font-weight:600;color:#86909C;">识别字段</div>
+          <div style="font-size:13px;font-weight:600;color:#86909C;">映射到系统字段</div>
+          <div style="font-size:13px;font-weight:600;color:#86909C;">识别内容（可编辑）</div>
+        </div>
+
+        <div class="field-list">
+          <!-- 高置信度字段 -->
+          <div class="field-group-title">自动映射字段</div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-high"></span>客户名称</div>
+            <div class="field-map">
+              <select onchange="checkConflict(this, '客户名称')">
+                <option value="customer_name" selected>客户名称</option>
+                <option value="project_name">项目名称</option>
+                <option value="contact_name">联系人</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" value="顺丰速运（上海）有限公司"></div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-high"></span>发货地址</div>
+            <div class="field-map">
+              <select>
+                <option value="origin_address" selected>高德地址（发）</option>
+                <option value="origin_city">发货城市</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" value="北京市朝阳区望京街道阜通东大街6号"></div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-high"></span>收货地址</div>
+            <div class="field-map">
+              <select>
+                <option value="dest_address" selected>高德地址（收）</option>
+                <option value="dest_city">收货城市</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" value="上海市浦东新区张江高科技园区"></div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-high"></span>货物名称</div>
+            <div class="field-map">
+              <select>
+                <option value="goods_name" selected>货物名称</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" value="电子产品（精密仪器）"></div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-high"></span>重量</div>
+            <div class="field-map">
+              <select>
+                <option value="weight" selected>重量(kg)</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" value="1250"></div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-mid"></span>件数</div>
+            <div class="field-map">
+              <select>
+                <option value="quantity" selected>件数</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" value="20"></div>
+          </div>
+
+          <!-- 补充信息带入 -->
+          <div class="field-group-title" style="margin-top:8px;">补充信息带入</div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-high"></span>主驾司机</div>
+            <div class="field-map">
+              <select>
+                <option value="driver_name" selected>主驾司机</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" value="张三"></div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-high"></span>挂车号</div>
+            <div class="field-map">
+              <select>
+                <option value="trailer_no" selected>挂车号</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" value="京B99999"></div>
+          </div>
+
+          <!-- 需手动选择 -->
+          <div class="field-group-title" style="margin-top:8px;">需手动确认</div>
+
+          <div class="field-item">
+            <div class="field-name"><span class="conf-dot conf-low"></span>备注信息</div>
+            <div class="field-map">
+              <select>
+                <option value="" selected>— 请选择 —</option>
+                <option value="remark">备注</option>
+                <option value="special_req">特殊要求</option>
+                <option value="">— 不映射 —</option>
+              </select>
+            </div>
+            <div class="field-value"><input type="text" class="unmapped" value="加急件，需冷链运输" placeholder="请先选择映射字段"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部操作 -->
+      <div class="right-footer">
+        <div class="tip">
+          <i class="bi bi-info-circle"></i>
+          映射关系将自动保存，下次识别相同字段时直接应用
+        </div>
+        <div class="actions">
+          <a href="index.html"><button class="btn-secondary-cyt">返回修改</button></a>
+          <button class="btn-primary-cyt" onclick="submitCreate()"><i class="bi bi-check-lg"></i> 确认创建运单</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 映射冲突弹窗 -->
+<div class="modal-overlay" id="conflictModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h5><i class="bi bi-exclamation-triangle" style="color:#FF7D00;"></i> 映射冲突</h5>
+      <button class="modal-close" onclick="closeConflict()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="conflict-info">
+        <div class="row-item"><span style="color:#86909C;">识别字段：</span><strong>客户名称</strong></div>
+        <div class="row-item"><span style="color:#86909C;">原映射：</span>客户名称 <span class="arrow">→</span> <span style="color:#00B42A;">客户名称</span></div>
+        <div class="row-item"><span style="color:#86909C;">新映射：</span>客户名称 <span class="arrow">→</span> <span style="color:#165DFF;">项目名称</span></div>
+      </div>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="conflictChoice" value="once" checked>
+          <div>
+            <div class="label">仅本次生效</div>
+            <div class="desc">本次创建运单使用新映射，不更新映射规则库</div>
+          </div>
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="conflictChoice" value="update">
+          <div>
+            <div class="label">更新映射规则</div>
+            <div class="desc">更新映射规则库，全集团后续识别均生效</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary-cyt" onclick="closeConflict()">取消</button>
+      <button class="btn-primary-cyt" onclick="confirmConflict()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- 成功提示 -->
+<div class="toast-success" id="toastSuccess">
+  <i class="bi bi-check-circle-fill"></i>
+  运单创建成功！运单号：RW2603240001
+</div>
+
+<script>
+function checkConflict(sel, fieldName) {
+  if (sel.value === 'project_name') {
+    document.getElementById('conflictModal').classList.add('show');
+  }
+}
+function closeConflict() {
+  document.getElementById('conflictModal').classList.remove('show');
+  document.querySelector('select').value = 'customer_name';
+}
+function confirmConflict() {
+  document.getElementById('conflictModal').classList.remove('show');
+}
+function submitCreate() {
+  const toast = document.getElementById('toastSuccess');
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    window.location.href = 'index.html';
+  }, 2500);
+}
+function zoomImg() {
+  alert('图片放大查看（原型示意）');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>满到满导出效果演示（长周期汇总 + 去重明细）</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #F2F3F5;
+      color: #4E5969;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 20px 24px 32px;
+    }
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1D2129;
+      margin-bottom: 8px;
+    }
+    .banner {
+      background: linear-gradient(135deg, #165DFF 0%, #4080FF 100%);
+      color: #fff;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .banner strong { font-weight: 600; }
+    .banner kbd {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: inherit;
+    }
+    .excel-frame {
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      overflow: hidden;
+      max-width: 1280px;
+    }
+    .excel-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #fff;
+      border-bottom: 1px solid #E5E6EB;
+      font-size: 13px;
+      color: #86909C;
+    }
+    .excel-titlebar .doc-name { color: #1D2129; font-weight: 600; }
+    .sheet-tabs {
+      display: flex;
+      gap: 2px;
+      padding: 0 8px;
+      background: #E8EAED;
+      border-bottom: 1px solid #D0D3D9;
+    }
+    .sheet-tab {
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #4E5969;
+      background: transparent;
+      border: none;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .sheet-tab.active {
+      background: #fff;
+      color: #165DFF;
+      font-weight: 600;
+    }
+    .sheet-body { padding: 16px 18px 24px; overflow-x: auto; }
+    .section {
+      margin-bottom: 28px;
+    }
+    .section:last-child { margin-bottom: 0; }
+    .section-head {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .section-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1D2129;
+    }
+    .pill {
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 4px;
+      background: #E8F3FF;
+      color: #165DFF;
+    }
+    .pill.secondary { background: #F2F3F5; color: #4E5969; }
+    .hint {
+      font-size: 12px;
+      color: #86909C;
+      width: 100%;
+    }
+    table.grid {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 720px;
+    }
+    table.grid th,
+    table.grid td {
+      border: 1px solid #E5E6EB;
+      padding: 8px 10px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    table.grid thead th {
+      background: #F2F3F5;
+      color: #1D2129;
+      font-weight: 600;
+    }
+    table.grid tbody tr:nth-child(even) { background: #FAFAFA; }
+    table.grid tbody tr:hover { background: #E8F3FF; }
+    table.grid .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .summary-row td { background: #F0F9FF !important; font-weight: 500; color: #1D2129; }
+    .row-dedup-demo {
+      outline: 2px solid #00B42A;
+      outline-offset: -2px;
+    }
+    .footnote {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #86909C;
+      max-width: 1280px;
+    }
+    .footnote a { color: #165DFF; text-decoration: none; }
+    .footnote a:hover { text-decoration: underline; }
+    @media print {
+      .banner, .excel-titlebar .hint-print-hide { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="page-title">满到满「导出选中明细」— 导出效果示意</h1>
+
+  <div class="banner">
+    <strong>需求目标（给研发 / 运营）</strong>：一次导出 = 同一 Sheet 内 <strong>两套表头</strong>——① <strong>长周期汇总</strong>（按<strong>车牌</strong>把勾选的多段满到满合成 <strong>1 行</strong>）② <strong>加油明细</strong>（全量合并后按 <kbd>在途费用编号</kbd> 去重）。下方为<strong>虚构数据</strong>，仅演示版式与逻辑；真实列以 PRD 第 5.3 节（分段 / 按车模式）为准。
+  </div>
+
+  <div class="excel-frame">
+    <div class="excel-titlebar">
+      <span class="doc-name">油耗分析_长周期导出_示意.xlsx</span>
+      <span class="hint-print-hide">· 本地演示 · 非真实文件</span>
+    </div>
+    <div class="sheet-tabs" role="tablist">
+      <button type="button" class="sheet-tab active" aria-selected="true">沪FF7392</button>
+      <button type="button" class="sheet-tab" disabled title="多车牌时每车一 Sheet">沪GC9385（示意）</button>
+    </div>
+    <div class="sheet-body">
+      <!-- 表一：长周期汇总 -->
+      <section class="section" aria-labelledby="sec-summary">
+        <div class="section-head">
+          <h2 class="section-label" id="sec-summary">表头 A · 长周期汇总</h2>
+          <span class="pill">本车牌勾选 3 段满到满 → 聚合为 1 行</span>
+          <span class="pill secondary">列示意：按车 / 按单圈模式（节选）</span>
+          <p class="hint">多司机时「司机姓名」为去重后用英文逗号拼接，本例为单司机。</p>
+        </div>
+        <table class="grid" id="tbl-summary">
+          <thead>
+            <tr>
+              <th>车辆所属组织</th>
+              <th>车牌号</th>
+              <th>司机姓名</th>
+              <th>首次加满时间</th>
+              <th>末次满油时间</th>
+              <th>满油GPS里程(km)</th>
+              <th>在途加油量合计(L)</th>
+              <th>满油总里程</th>
+              <th>实际百公里油耗</th>
+              <th>总金额</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="summary-row">
+              <td>上海滨宜路通</td>
+              <td>沪FF7392</td>
+              <td>张治勇</td>
+              <td>2026-04-05 00:10</td>
+              <td>2026-04-10 23:14</td>
+              <td class="num">5,241.68</td>
+              <td class="num">1,640.75</td>
+              <td class="num">5,342</td>
+              <td class="num">31.32</td>
+              <td class="num">8,900.12</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 表二：加油明细 -->
+      <section class="section" aria-labelledby="sec-detail">
+        <div class="section-head">
+          <h2 class="section-label" id="sec-detail">表头 B · 加油明细（去重后）</h2>
+          <span class="pill">去重键：在途费用编号</span>
+          <span class="pill secondary">排序：加油时间升序</span>
+          <p class="hint">绿色高亮行：上一段「末次加满」与下一段「首次加满」为同一笔在途费用时，明细中<strong>只保留一行</strong>。</p>
+        </div>
+        <table class="grid" id="tbl-detail">
+          <thead>
+            <tr>
+              <th>序号</th>
+              <th>网点</th>
+              <th>费用名称</th>
+              <th>在途费用编号</th>
+              <th>司机</th>
+              <th>加油时间</th>
+              <th>金额(元)</th>
+              <th>单价(元/L)</th>
+              <th>加油量(L)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="num">1</td>
+              <td>江苏××油站</td>
+              <td>在途油费</td>
+              <td>ON-WAY-202604050001</td>
+              <td>张治勇</td>
+              <td>2026-04-05 00:10</td>
+              <td class="num">1,323.37</td>
+              <td class="num">5.38</td>
+              <td class="num">245.98</td>
+            </tr>
+            <tr>
+              <td class="num">2</td>
+              <td>浙江××油站</td>
+              <td>在途油费</td>
+              <td>ON-WAY-202604080102</td>
+              <td>张治勇</td>
+              <td>2026-04-08 14:22</td>
+              <td class="num">980.00</td>
+              <td class="num">5.40</td>
+              <td class="num">181.48</td>
+            </tr>
+            <tr class="row-dedup-demo" title="同一段边界加油在明细中只出现一次">
+              <td class="num">3</td>
+              <td>上海××油站</td>
+              <td>在途油费</td>
+              <td>ON-WAY-202604100409</td>
+              <td>张治勇</td>
+              <td>2026-04-10 04:09</td>
+              <td class="num">1,200.00</td>
+              <td class="num">5.44</td>
+              <td class="num">220.50</td>
+            </tr>
+            <tr>
+              <td class="num">4</td>
+              <td>上海××油站</td>
+              <td>在途油费</td>
+              <td>ON-WAY-202604102314</td>
+              <td>张治勇</td>
+              <td>2026-04-10 23:14</td>
+              <td class="num">1,323.37</td>
+              <td class="num">5.38</td>
+              <td class="num">245.98</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <p class="footnote">
+    详细规则见同目录 PRD：
+    <a href="./油耗分析满到满导出汇总明细-PRD-v1.0.md">油耗分析满到满导出汇总明细-PRD-v1.0.md</a>
+    · 勾选上限 500 条 · 不包含与「导出选中」相同的逐段满到满多行主表
+  </p>
+
+  <script>
+    (function () {
+      var tabs = document.querySelectorAll('.sheet-tab:not([disabled])');
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          tabs.forEach(function (t) { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+          tab.classList.add('active');
+          tab.setAttribute('aria-selected', 'true');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

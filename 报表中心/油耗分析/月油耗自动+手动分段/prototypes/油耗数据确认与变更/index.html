@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>油耗分析月报表 - 财运通</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#F2F3F5;color:#4E5969;font-size:14px;line-height:1.5}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:200px;background:#1D2129;z-index:100}
+.sidebar-logo{height:56px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-logo span{color:#fff;font-size:16px;font-weight:600}
+.nav-group{font-size:12px;color:rgba(255,255,255,.4);padding:16px 16px 8px}
+.nav-link{display:flex;align-items:center;height:40px;padding:0 16px;color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;transition:.2s}
+.nav-link:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.9)}
+.nav-link.active{background:rgba(255,255,255,.1);color:#fff;border-left:3px solid #165DFF}
+.nav-link i{font-size:18px;margin-right:8px;width:18px;text-align:center}
+.topbar{position:fixed;left:200px;top:0;right:0;height:56px;background:#fff;border-bottom:1px solid #E5E6EB;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:99}
+.breadcrumb-nav{font-size:14px;color:#86909C}
+.breadcrumb-nav span{color:#1D2129;font-weight:600}
+.avatar{width:32px;height:32px;border-radius:50%;background:#165DFF;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.main{margin-left:200px;margin-top:56px;padding:24px;min-height:calc(100vh - 56px)}
+.card-box{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:20px 24px;margin-bottom:16px}
+.btn-p{background:#165DFF;border:none;color:#fff;height:32px;padding:0 16px;border-radius:4px;font-size:14px;cursor:pointer}
+.btn-p:hover{background:#4080FF;color:#fff}
+.btn-s{background:#fff;border:1px solid #E5E6EB;color:#4E5969;height:32px;padding:0 16px;border-radius:4px;font-size:14px;cursor:pointer}
+.btn-s:hover{border-color:#165DFF;color:#165DFF}
+.btn-t{background:none;border:none;color:#165DFF;font-size:14px;padding:0;cursor:pointer}
+.btn-t:hover{color:#4080FF}
+.search-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:0}
+.form-control,.form-select{height:32px;border-radius:4px;border:1px solid #E5E6EB;font-size:14px}
+.form-control:focus,.form-select:focus{border-color:#165DFF;box-shadow:none}
+.tab-nav{display:flex;border-bottom:2px solid #E5E6EB;margin-bottom:16px;background:#fff;border-radius:8px 8px 0 0;padding:0 24px}
+.tab-item{padding:14px 20px;font-size:14px;color:#86909C;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.2s}
+.tab-item.active{color:#165DFF;border-bottom-color:#165DFF;font-weight:500}
+.tab-item:hover{color:#165DFF}
+table thead th{background:#F7F8FA;font-weight:600;color:#1D2129;font-size:14px;padding:12px 16px;white-space:nowrap;border:none}
+table tbody td{padding:12px 16px;font-size:14px;color:#4E5969;border-bottom:1px solid #F2F3F5;vertical-align:middle;white-space:nowrap}
+table tbody tr:hover{background:#FAFBFC}
+.tag{padding:2px 8px;border-radius:2px;font-size:12px;display:inline-block}
+.tag-green{background:#E8FFEA;color:#00B42A}
+.tag-blue{background:#E8F3FF;color:#165DFF}
+.tag-orange{background:#FFF3E0;color:#FF7D00}
+.tag-gray{background:#F2F3F5;color:#86909C}
+.table-wrap{overflow-x:auto}
+.action-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.pagination .page-link{color:#4E5969;font-size:14px}
+.pagination .page-item.active .page-link{background:#165DFF;border-color:#165DFF;color:#fff}
+/* 确认状态相关 */
+.btn-confirm{background:#00B42A;border:none;color:#fff;height:28px;padding:0 12px;border-radius:4px;font-size:13px;cursor:pointer}
+.btn-confirm:hover{background:#009A29;color:#fff}
+.btn-revoke-confirm{background:#fff;border:1px solid #FF7D00;color:#FF7D00;height:28px;padding:0 12px;border-radius:4px;font-size:13px;cursor:pointer}
+.btn-revoke-confirm:hover{background:#FFF3E0}
+/* 变更提醒角标 */
+.bell-wrap{position:relative;cursor:pointer}
+.bell-badge{position:absolute;top:-6px;right:-8px;background:#F53F3F;color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+/* Drawer */
+.drawer-mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s}
+.drawer-mask.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:60%;background:#fff;z-index:201;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;box-shadow:-4px 0 16px rgba(0,0,0,.12)}
+.drawer.open{transform:translateX(0)}
+.drawer-header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #E5E6EB;flex-shrink:0}
+.drawer-header h5{font-size:16px;font-weight:600;color:#1D2129;margin:0}
+.drawer-body{flex:1;overflow-y:auto;padding:24px}
+.drawer-footer{padding:16px 24px;border-top:1px solid #E5E6EB;flex-shrink:0;display:flex;justify-content:flex-end;gap:8px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.info-item label{font-size:12px;color:#86909C;display:block;margin-bottom:4px}
+.info-item span{font-size:14px;color:#1D2129}
+/* Modal */
+.modal-title{font-size:16px;font-weight:600;color:#1D2129}
+.warn-box{background:#FFF3E0;border:1px solid #FF7D00;border-radius:4px;padding:12px 16px;font-size:14px;color:#FF7D00;margin-top:12px}
+.warn-box i{margin-right:6px}
+.info-box{background:#E8F3FF;border:1px solid #165DFF;border-radius:4px;padding:12px 16px;font-size:14px;color:#165DFF;margin-top:12px}
+.info-box i{margin-right:6px}
+.success-box{background:#E8FFEA;border:1px solid #00B42A;border-radius:4px;padding:12px 16px;font-size:14px;color:#00B42A;margin-top:12px}
+.success-box i{margin-right:6px}
+</style>
+</head>
+<body>
+<!-- 侧边栏 -->
+<div class="sidebar">
+  <div class="sidebar-logo"><i class="bi bi-truck" style="color:#165DFF;font-size:20px;margin-right:8px"></i><span>财运通</span></div>
+  <div class="nav-group">车辆运营</div>
+  <a class="nav-link" href="#"><i class="bi bi-speedometer2"></i>首页</a>
+  <a class="nav-link" href="#"><i class="bi bi-gear"></i>系统设置</a>
+  <a class="nav-link" href="#"><i class="bi bi-bar-chart"></i>车辆运营报表</a>
+  <a class="nav-link active" href="#"><i class="bi bi-fuel-pump"></i>油耗分析</a>
+  <a class="nav-link" href="#"><i class="bi bi-box-seam"></i>货物管理</a>
+  <a class="nav-link" href="#"><i class="bi bi-clipboard-data"></i>定油耗标准</a>
+  <a class="nav-link" href="#"><i class="bi bi-wrench"></i>车辆维修管理</a>
+</div>
+
+<!-- 顶部栏 -->
+<div class="topbar">
+  <div class="breadcrumb-nav">车辆运营 / 油耗分析 / <span>月报表</span></div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="bell-wrap" onclick="openChangeNotify()">
+      <i class="bi bi-bell" style="font-size:18px;color:#86909C"></i>
+      <span class="bell-badge" id="bellBadge">3</span>
+    </div>
+    <div class="avatar">张</div>
+  </div>
+</div>
+
+<!-- 主内容 -->
+<div class="main">
+  <!-- Tab -->
+  <div class="tab-nav">
+    <div class="tab-item active">月报表</div>
+    <div class="tab-item">满到满报表</div>
+  </div>
+
+  <!-- 搜索区 -->
+  <div class="card-box">
+    <div class="search-row">
+      <label style="font-size:14px;color:#4E5969;white-space:nowrap">月份</label>
+      <input type="month" class="form-control" style="width:160px" value="2026-02">
+      <button class="btn-p">查询</button>
+      <button class="btn-s">重置</button>
+    </div>
+  </div>
+
+  <!-- 操作栏 -->
+  <div class="action-bar">
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-p" onclick="confirmMonth()"><i class="bi bi-check-circle" style="margin-right:4px"></i>确认本月数据</button>
+      <button class="btn-s" onclick="openRevokeModal()"><i class="bi bi-arrow-counterclockwise" style="margin-right:4px"></i>撤回确认</button>
+      <button class="btn-s"><i class="bi bi-arrow-repeat" style="margin-right:4px"></i>刷新计算</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-s"><i class="bi bi-download" style="margin-right:4px"></i>导出</button>
+      <button class="btn-s"><i class="bi bi-printer" style="margin-right:4px"></i>打印</button>
+    </div>
+  </div>
+
+  <!-- 表格 -->
+  <div class="card-box" style="padding:0">
+    <div class="table-wrap">
+      <table class="table table-borderless mb-0">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="checkAll" onclick="toggleAll(this)"></th>
+            <th>序号</th>
+            <th>确认状态</th>
+            <th>月份</th>
+            <th>司机姓名</th>
+            <th>车牌号</th>
+            <th>满到满周期</th>
+            <th>标准升数</th>
+            <th>实际升数</th>
+            <th>升数差额</th>
+            <th>GPS里程数</th>
+            <th>平均油价</th>
+            <th>油耗奖励</th>
+            <th>油耗惩罚</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox" class="row-check"></td>
+            <td>1</td>
+            <td><span class="tag tag-green">已确认</span></td>
+            <td>2026-02</td>
+            <td>王建国</td>
+            <td>京A12345</td>
+            <td>01-28 ~ 02-27</td>
+            <td>1,280.50</td>
+            <td>1,195.00</td>
+            <td style="color:#00B42A;font-weight:500">+85.50</td>
+            <td>4,520</td>
+            <td>7.82</td>
+            <td style="color:#00B42A;font-weight:500">334.71</td>
+            <td>-</td>
+            <td><button class="btn-t" onclick="openModifyDrawer('京A12345')">修改周期</button></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="row-check"></td>
+            <td>2</td>
+            <td><span class="tag tag-green">已确认</span></td>
+            <td>2026-02</td>
+            <td>李志强</td>
+            <td>京B67890</td>
+            <td>02-03 ~ 03-02</td>
+            <td>1,450.30</td>
+            <td>1,520.00</td>
+            <td style="color:#F53F3F;font-weight:500">-69.70</td>
+            <td>5,120</td>
+            <td>7.65</td>
+            <td>-</td>
+            <td style="color:#F53F3F;font-weight:500">266.81</td>
+            <td><button class="btn-t" onclick="openModifyDrawer('京B67890')">修改周期</button></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="row-check"></td>
+            <td>3</td>
+            <td><span class="tag tag-blue">未确认</span></td>
+            <td>2026-02</td>
+            <td>张伟</td>
+            <td>京C11223</td>
+            <td>01-30 ~ 02-28</td>
+            <td>980.20</td>
+            <td>945.00</td>
+            <td style="color:#00B42A;font-weight:500">+35.20</td>
+            <td>3,680</td>
+            <td>7.90</td>
+            <td style="color:#00B42A;font-weight:500">139.04</td>
+            <td>-</td>
+            <td><button class="btn-t" onclick="openModifyDrawer('京C11223')">修改周期</button></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="row-check"></td>
+            <td>4</td>
+            <td><span class="tag tag-blue">未确认</span></td>
+            <td>2026-02</td>
+            <td>刘洋</td>
+            <td>京D44556</td>
+            <td>01-31 ~ 03-01</td>
+            <td>1,680.00</td>
+            <td>1,710.50</td>
+            <td style="color:#F53F3F;font-weight:500">-30.50</td>
+            <td>6,200</td>
+            <td>7.75</td>
+            <td>-</td>
+            <td style="color:#F53F3F;font-weight:500">118.19</td>
+            <td><button class="btn-t" onclick="openModifyDrawer('京D44556')">修改周期</button></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="row-check"></td>
+            <td>5</td>
+            <td><span class="tag tag-blue">未确认</span></td>
+            <td>2026-02</td>
+            <td>赵鹏</td>
+            <td>京E77889</td>
+            <td>02-01 ~ 03-03</td>
+            <td>1,120.80</td>
+            <td>1,085.00</td>
+            <td style="color:#00B42A;font-weight:500">+35.80</td>
+            <td>4,100</td>
+            <td>7.88</td>
+            <td style="color:#00B42A;font-weight:500">141.10</td>
+            <td>-</td>
+            <td><button class="btn-t" onclick="openModifyDrawer('京E77889')">修改周期</button></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" class="row-check"></td>
+            <td>6</td>
+            <td><span class="tag tag-orange">有变更</span></td>
+            <td>2026-02</td>
+            <td>陈明</td>
+            <td>京F99001</td>
+            <td>01-29 ~ 02-26</td>
+            <td>1,350.60</td>
+            <td>1,290.00</td>
+            <td style="color:#00B42A;font-weight:500">+60.60</td>
+            <td>4,800</td>
+            <td>7.80</td>
+            <td style="color:#00B42A;font-weight:500">236.34</td>
+            <td>-</td>
+            <td>
+              <button class="btn-t" onclick="openChangeDetail()" style="margin-right:8px">查看变更</button>
+              <button class="btn-t" onclick="openModifyDrawer('京F99001')">修改周期</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:16px 24px;display:flex;justify-content:flex-end">
+      <nav><ul class="pagination pagination-sm mb-0">
+        <li class="page-item disabled"><a class="page-link" href="#">«</a></li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">»</a></li>
+      </ul></nav>
+    </div>
+  </div>
+</div>
+
+<!-- 确认本月弹窗 -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:8px;border:none">
+      <div class="modal-header" style="border-bottom:1px solid #E5E6EB;padding:16px 24px">
+        <h5 class="modal-title">确认本月油耗数据</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px">
+        <div style="font-size:14px;color:#4E5969;margin-bottom:12px">确认后，2026年2月的油耗数据将被锁定。后续油费变更如影响到已确认月份，系统将生成变更提醒，需人工确认后才会更新报表。</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div><span style="color:#86909C;font-size:13px">确认月份</span><div style="font-size:14px;color:#1D2129;margin-top:4px;font-weight:600">2026年2月</div></div>
+          <div><span style="color:#86909C;font-size:13px">车辆数</span><div style="font-size:14px;color:#1D2129;margin-top:4px;font-weight:600">6 辆</div></div>
+          <div><span style="color:#86909C;font-size:13px">未确认</span><div style="font-size:14px;color:#165DFF;margin-top:4px;font-weight:600">3 辆</div></div>
+          <div><span style="color:#86909C;font-size:13px">已确认</span><div style="font-size:14px;color:#00B42A;margin-top:4px;font-weight:600">2 辆</div></div>
+        </div>
+        <div class="info-box">
+          <i class="bi bi-info-circle-fill"></i>本次将确认剩余 3 辆未确认车辆的油耗数据，已确认的不受影响。
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #E5E6EB;padding:12px 24px;gap:8px">
+        <button class="btn-s" data-bs-dismiss="modal">取消</button>
+        <button class="btn-confirm" data-bs-dismiss="modal" onclick="doConfirm()" style="height:32px;padding:0 16px;font-size:14px">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 撤回确认弹窗 -->
+<div class="modal fade" id="revokeConfirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:8px;border:none">
+      <div class="modal-header" style="border-bottom:1px solid #E5E6EB;padding:16px 24px">
+        <h5 class="modal-title">撤回确认</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <i class="bi bi-exclamation-triangle-fill" style="color:#FF7D00;font-size:20px;flex-shrink:0;margin-top:2px"></i>
+          <div style="font-size:14px;color:#4E5969;line-height:1.6">
+            撤回后，2026年2月数据将变为<strong>未确认</strong>状态，油费变更将自动更新报表。待处理的变更提醒将自动执行更新。
+          </div>
+        </div>
+        <div class="warn-box">
+          <i class="bi bi-info-circle-fill"></i>当前有 <strong>1</strong> 条待处理的变更提醒，撤回后将自动更新到报表中。
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #E5E6EB;padding:12px 24px;gap:8px">
+        <button class="btn-s" data-bs-dismiss="modal">取消</button>
+        <button style="background:#FF7D00;border:none;color:#fff;height:32px;padding:0 16px;border-radius:4px;font-size:14px;cursor:pointer" data-bs-dismiss="modal" onclick="doRevoke()">确认撤回</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 变更详情弹窗 -->
+<div class="modal fade" id="changeDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:8px;border:none">
+      <div class="modal-header" style="border-bottom:1px solid #E5E6EB;padding:16px 24px">
+        <h5 class="modal-title"><i class="bi bi-exclamation-circle-fill" style="color:#FF7D00;margin-right:8px"></i>变更提醒 - 京F99001 - 2026年2月</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px">
+        <!-- 变更来源 -->
+        <div style="margin-bottom:20px">
+          <h6 style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:12px">变更来源</h6>
+          <div style="background:#F7F8FA;border-radius:8px;padding:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+              <div><span style="color:#86909C;font-size:12px">司机</span><div style="font-size:14px;color:#1D2129;margin-top:2px">陈明</div></div>
+              <div><span style="color:#86909C;font-size:12px">变更类型</span><div style="font-size:14px;color:#1D2129;margin-top:2px">修改加油记录</div></div>
+              <div><span style="color:#86909C;font-size:12px">变更时间</span><div style="font-size:14px;color:#1D2129;margin-top:2px">2026-03-18 14:30</div></div>
+              <div><span style="color:#86909C;font-size:12px">加油日期</span><div style="font-size:14px;color:#1D2129;margin-top:2px">2026-02-15</div></div>
+              <div><span style="color:#86909C;font-size:12px">变更内容</span><div style="font-size:14px;color:#1D2129;margin-top:2px">加油量 180L → 200L</div></div>
+              <div><span style="color:#86909C;font-size:12px">是否加满</span><div style="font-size:14px;color:#1D2129;margin-top:2px">否（不影响满到满周期）</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- 数据对比 -->
+        <div style="margin-bottom:16px">
+          <h6 style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:12px">数据影响对比</h6>
+          <table class="table table-bordered mb-0" style="font-size:13px">
+            <thead style="background:#F7F8FA">
+              <tr><th>指标</th><th>变更前</th><th>变更后</th><th>差异</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>实际升数</td><td>1,270.00</td><td>1,290.00</td><td style="color:#F53F3F;font-weight:500">+20.00</td></tr>
+              <tr><td>升数差额</td><td>+80.60</td><td>+60.60</td><td style="color:#F53F3F;font-weight:500">-20.00</td></tr>
+              <tr><td>平均油价</td><td>7.78</td><td>7.80</td><td>+0.02</td></tr>
+              <tr><td>油耗奖励</td><td>313.94</td><td>236.34</td><td style="color:#F53F3F;font-weight:500">-77.60</td></tr>
+              <tr><td>油耗惩罚</td><td>-</td><td>-</td><td>-</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="info-box" style="margin-top:0">
+          <i class="bi bi-info-circle-fill"></i>此变更不影响满到满周期节点，仅影响当月（2026年2月）的油耗数据。
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #E5E6EB;padding:12px 24px;gap:8px">
+        <button class="btn-s" data-bs-dismiss="modal">暂不处理</button>
+        <button class="btn-p" data-bs-dismiss="modal" onclick="doAcceptChange()">确认更新</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 变更影响满到满周期的弹窗 -->
+<div class="modal fade" id="changePeriodModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:8px;border:none">
+      <div class="modal-header" style="border-bottom:1px solid #E5E6EB;padding:16px 24px">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill" style="color:#F53F3F;margin-right:8px"></i>变更提醒 - 京G22334 - 2026年2月</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px">
+        <div style="margin-bottom:20px">
+          <h6 style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:12px">变更来源</h6>
+          <div style="background:#F7F8FA;border-radius:8px;padding:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+              <div><span style="color:#86909C;font-size:12px">司机</span><div style="font-size:14px;color:#1D2129;margin-top:2px">周杰</div></div>
+              <div><span style="color:#86909C;font-size:12px">变更类型</span><div style="font-size:14px;color:#1D2129;margin-top:2px">新增加油记录</div></div>
+              <div><span style="color:#86909C;font-size:12px">变更时间</span><div style="font-size:14px;color:#1D2129;margin-top:2px">2026-03-20 09:15</div></div>
+              <div><span style="color:#86909C;font-size:12px">加油日期</span><div style="font-size:14px;color:#1D2129;margin-top:2px">2026-02-20</div></div>
+              <div><span style="color:#86909C;font-size:12px">加油量</span><div style="font-size:14px;color:#1D2129;margin-top:2px">350L</div></div>
+              <div><span style="color:#86909C;font-size:12px">是否加满</span><div style="font-size:14px;color:#F53F3F;margin-top:2px;font-weight:600">是（影响满到满周期）</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- 周期影响 -->
+        <div style="background:#FFECE8;border:1px solid #F53F3F;border-radius:8px;padding:16px;margin-bottom:20px">
+          <div style="font-size:14px;font-weight:600;color:#F53F3F;margin-bottom:8px"><i class="bi bi-exclamation-triangle-fill" style="margin-right:6px"></i>此变更将影响满到满周期，涉及2个月份数据</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+            <div style="background:#fff;border-radius:4px;padding:12px">
+              <div style="font-size:12px;color:#86909C;margin-bottom:4px">2026年2月（当前月）</div>
+              <div style="font-size:13px;color:#4E5969">周期变更：01-28→03-01 <i class="bi bi-arrow-right"></i> 01-28→<strong style="color:#F53F3F">02-20</strong></div>
+            </div>
+            <div style="background:#fff;border-radius:4px;padding:12px">
+              <div style="font-size:12px;color:#86909C;margin-bottom:4px">2026年3月（下月）</div>
+              <div style="font-size:13px;color:#4E5969">周期变更：03-01→03-30 <i class="bi bi-arrow-right"></i> <strong style="color:#F53F3F">02-20</strong>→03-30</div>
+            </div>
+          </div>
+        </div>
+        <!-- 2月数据对比 -->
+        <div style="margin-bottom:16px">
+          <h6 style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:12px">2026年2月 数据影响</h6>
+          <table class="table table-bordered mb-0" style="font-size:13px">
+            <thead style="background:#F7F8FA"><tr><th>指标</th><th>变更前</th><th>变更后</th><th>差异</th></tr></thead>
+            <tbody>
+              <tr><td>满到满周期</td><td>01-28 ~ 03-01</td><td style="color:#F53F3F;font-weight:500">01-28 ~ 02-20</td><td>缩短10天</td></tr>
+              <tr><td>标准升数</td><td>1,580.00</td><td>1,120.00</td><td style="color:#00B42A">-460.00</td></tr>
+              <tr><td>实际升数</td><td>1,620.00</td><td>1,050.00</td><td style="color:#00B42A">-570.00</td></tr>
+              <tr><td>升数差额</td><td>-40.00</td><td>+70.00</td><td style="color:#00B42A;font-weight:500">+110.00</td></tr>
+              <tr><td>油耗奖励</td><td>-</td><td style="color:#00B42A;font-weight:500">273.00</td><td>+273.00</td></tr>
+              <tr><td>油耗惩罚</td><td>156.00</td><td>-</td><td style="color:#00B42A">-156.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #E5E6EB;padding:12px 24px;gap:8px">
+        <button class="btn-s" data-bs-dismiss="modal">暂不处理</button>
+        <button class="btn-p" data-bs-dismiss="modal" onclick="doAcceptPeriodChange()">确认更新（2月+3月）</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 修改周期抽屉 -->
+<div class="drawer-mask" id="modifyMask" onclick="closeModifyDrawer()"></div>
+<div class="drawer" id="modifyDrawer">
+  <div class="drawer-header">
+    <h5>修改满到满周期 - <span id="modifyPlate">京A12345</span> - 2026年2月</h5>
+    <i class="bi bi-x-lg" style="cursor:pointer;color:#86909C;font-size:18px" onclick="closeModifyDrawer()"></i>
+  </div>
+  <div class="drawer-body">
+    <!-- 当前周期信息 -->
+    <div style="margin-bottom:24px">
+      <h6 style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:12px">当前周期信息</h6>
+      <div class="info-grid">
+        <div class="info-item"><label>司机</label><span id="modifyDriver">王建国</span></div>
+        <div class="info-item"><label>车牌号</label><span id="modifyPlate2">京A12345</span></div>
+        <div class="info-item"><label>当前开始时间</label><span id="modifyStart" style="font-weight:600;color:#165DFF">2026-01-28 14:30</span></div>
+        <div class="info-item"><label>当前结束时间</label><span id="modifyEnd" style="font-weight:600;color:#165DFF">2026-02-27 16:20</span></div>
+        <div class="info-item"><label>上月周期</label><span>2025-12-30 → 2026-01-28</span></div>
+        <div class="info-item"><label>下月周期</label><span>2026-02-27 → 2026-03-29</span></div>
+      </div>
+    </div>
+
+    <!-- 修改周期 -->
+    <div style="margin-bottom:24px">
+      <h6 style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:12px">选择新的周期节点</h6>
+      <div style="background:#F7F8FA;border-radius:8px;padding:20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div>
+            <label style="font-size:14px;color:#4E5969;margin-bottom:8px;display:block">新开始时间 <span style="color:#F53F3F">*</span></label>
+            <select class="form-select" id="newStartTime" style="height:36px" onchange="updatePreview()">
+              <optgroup label="加满记录（推荐）">
+                <option value="2026-01-20">【满】01-20 09:30 加满 320L</option>
+                <option value="2026-01-25">【满】01-25 15:00 加满 280L</option>
+                <option value="2026-01-28" selected>【满】01-28 14:30 加满 350L（当前开始）</option>
+                <option value="2026-02-27">【满】02-27 16:20 加满 340L（当前结束）</option>
+                <option value="2026-03-02">【满】03-02 09:45 加满 300L</option>
+                <option value="2026-03-10">【满】03-10 14:00 加满 330L</option>
+              </optgroup>
+              <optgroup label="非加满记录">
+                <option value="2026-02-05">【非满】02-05 08:40 加油 180L</option>
+                <option value="2026-02-12">【非满】02-12 16:15 加油 200L</option>
+                <option value="2026-02-18">【非满】02-18 09:00 加油 165L</option>
+              </optgroup>
+            </select>
+            <div style="font-size:12px;color:#86909C;margin-top:4px">可选范围：上月周期开始(12-30)之后 ~ 下月周期结束(03-29)之前的所有加油记录</div>
+          </div>
+          <div>
+            <label style="font-size:14px;color:#4E5969;margin-bottom:8px;display:block">新结束时间 <span style="color:#F53F3F">*</span></label>
+            <select class="form-select" id="newEndTime" style="height:36px" onchange="updatePreview()">
+              <optgroup label="加满记录（推荐）">
+                <option value="2026-01-20">【满】01-20 09:30 加满 320L</option>
+                <option value="2026-01-25">【满】01-25 15:00 加满 280L</option>
+                <option value="2026-01-28">【满】01-28 14:30 加满 350L（当前开始）</option>
+                <option value="2026-02-27" selected>【满】02-27 16:20 加满 340L（当前结束）</option>
+                <option value="2026-03-02">【满】03-02 09:45 加满 300L</option>
+                <option value="2026-03-10">【满】03-10 14:00 加满 330L</option>
+              </optgroup>
+              <optgroup label="非加满记录">
+                <option value="2026-02-05">【非满】02-05 08:40 加油 180L</option>
+                <option value="2026-02-12">【非满】02-12 16:15 加油 200L</option>
+                <option value="2026-02-18">【非满】02-18 09:00 加油 165L</option>
+              </optgroup>
+            </select>
+            <div style="font-size:12px;color:#86909C;margin-top:4px">可选范围与开始时间一致，保存时校验开始时间早于结束时间</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 影响预览 -->
+    <div style="margin-bottom:24px">
+      <h6 style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:12px">影响范围预览</h6>
+      <div id="impactPreview" style="background:#E8F3FF;border:1px solid #165DFF;border-radius:8px;padding:16px">
+        <div style="font-size:14px;color:#165DFF;margin-bottom:8px"><i class="bi bi-info-circle-fill" style="margin-right:6px"></i>当前选择与原周期一致，无数据变化</div>
+      </div>
+    </div>
+
+    <!-- 加油记录明细 -->
+    <div>
+      <h6 style="font-size:14px;font-weight:600;color:#1D2129;margin-bottom:12px">周期内加油记录</h6>
+      <div class="table-wrap">
+        <table class="table table-borderless mb-0" style="font-size:13px">
+          <thead>
+            <tr><th>加油日期</th><th>加油量(L)</th><th>油费(元)</th><th>是否加满</th><th>加油站</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2026-01-28 14:30</td><td>350</td><td>2,730.00</td><td><span class="tag tag-green">加满</span></td><td>公司油库</td></tr>
+            <tr><td>2026-02-05 08:40</td><td>180</td><td>1,404.00</td><td><span style="color:#86909C">否</span></td><td>中石化京通站</td></tr>
+            <tr><td>2026-02-12 16:15</td><td>200</td><td>1,560.00</td><td><span style="color:#86909C">否</span></td><td>中石化望京站</td></tr>
+            <tr><td>2026-02-18 09:00</td><td>165</td><td>1,287.00</td><td><span style="color:#86909C">否</span></td><td>中石油通州站</td></tr>
+            <tr><td>2026-02-27 16:20</td><td>340</td><td>2,652.00</td><td><span class="tag tag-green">加满</span></td><td>公司油库</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-s" onclick="closeModifyDrawer()">取消</button>
+    <button class="btn-p" onclick="saveModify()">保存</button>
+  </div>
+</div>
+
+<!-- Toast提示 -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:300">
+  <div id="toast" class="toast" role="alert" style="border-radius:8px;border:none;box-shadow:0 4px 16px rgba(0,0,0,.12)">
+    <div class="toast-body" style="padding:16px 20px;font-size:14px" id="toastBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleAll(el){
+  document.querySelectorAll('.row-check').forEach(function(c){c.checked=el.checked});
+}
+
+function confirmMonth(){
+  new bootstrap.Modal(document.getElementById('confirmModal')).show();
+}
+
+function openRevokeModal(){
+  new bootstrap.Modal(document.getElementById('revokeConfirmModal')).show();
+}
+
+function doConfirm(){
+  showToast('<i class="bi bi-check-circle-fill" style="color:#00B42A;margin-right:8px"></i>2026年2月油耗数据已确认');
+}
+
+function doRevoke(){
+  showToast('<i class="bi bi-check-circle-fill" style="color:#FF7D00;margin-right:8px"></i>2026年2月确认已撤回，待处理变更已自动更新');
+}
+
+function openChangeNotify(){
+  window.location.href='change-notify.html';
+}
+
+function openChangeDetail(){
+  new bootstrap.Modal(document.getElementById('changeDetailModal')).show();
+}
+
+function openChangePeriodDetail(){
+  new bootstrap.Modal(document.getElementById('changePeriodModal')).show();
+}
+
+function doAcceptChange(){
+  showToast('<i class="bi bi-check-circle-fill" style="color:#00B42A;margin-right:8px"></i>变更已确认更新，京F99001 2月油耗数据已重新计算');
+}
+
+function doAcceptPeriodChange(){
+  showToast('<i class="bi bi-check-circle-fill" style="color:#00B42A;margin-right:8px"></i>变更已确认更新，京G22334 2月、3月油耗数据已重新计算');
+}
+
+function openModifyDrawer(plate){
+  var data={
+    '京A12345':{driver:'王建国',start:'2026-01-28 14:30',end:'2026-02-27 16:20'},
+    '京B67890':{driver:'李志强',start:'2026-02-03 10:00',end:'2026-03-02 09:45'},
+    '京C11223':{driver:'张伟',start:'2026-01-30 11:00',end:'2026-02-28 15:30'},
+    '京D44556':{driver:'刘洋',start:'2026-01-31 08:20',end:'2026-03-01 17:00'},
+    '京E77889':{driver:'赵鹏',start:'2026-02-01 09:15',end:'2026-03-03 10:30'},
+    '京F99001':{driver:'陈明',start:'2026-01-29 13:00',end:'2026-02-26 16:45'}
+  };
+  var d=data[plate]||{driver:'-',start:'-',end:'-'};
+  document.getElementById('modifyPlate').textContent=plate;
+  document.getElementById('modifyPlate2').textContent=plate;
+  document.getElementById('modifyDriver').textContent=d.driver;
+  document.getElementById('modifyStart').textContent=d.start;
+  document.getElementById('modifyEnd').textContent=d.end;
+  document.getElementById('modifyMask').classList.add('open');
+  document.getElementById('modifyDrawer').classList.add('open');
+}
+
+function closeModifyDrawer(){
+  document.getElementById('modifyMask').classList.remove('open');
+  document.getElementById('modifyDrawer').classList.remove('open');
+}
+
+function updatePreview(){
+  var s=document.getElementById('newStartTime').value;
+  var e=document.getElementById('newEndTime').value;
+  var box=document.getElementById('impactPreview');
+  if(s==='2026-01-28'&&e==='2026-02-27'){
+    box.style.background='#E8F3FF';box.style.borderColor='#165DFF';
+    box.innerHTML='<div style="font-size:14px;color:#165DFF"><i class="bi bi-info-circle-fill" style="margin-right:6px"></i>当前选择与原周期一致，无数据变化</div>';
+  } else {
+    box.style.background='#FFF3E0';box.style.borderColor='#FF7D00';
+    box.innerHTML='<div style="font-size:14px;font-weight:600;color:#FF7D00;margin-bottom:8px"><i class="bi bi-exclamation-triangle-fill" style="margin-right:6px"></i>保存后将影响以下月份数据</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px">'
+      +'<div style="background:#fff;border-radius:4px;padding:10px"><div style="font-size:12px;color:#86909C">2026年1月</div><div style="font-size:13px;color:#4E5969;margin-top:4px">结束时间将调整</div></div>'
+      +'<div style="background:#fff;border-radius:4px;padding:10px"><div style="font-size:12px;color:#86909C;font-weight:600">2026年2月（当月）</div><div style="font-size:13px;color:#4E5969;margin-top:4px">周期重新计算</div></div>'
+      +'<div style="background:#fff;border-radius:4px;padding:10px"><div style="font-size:12px;color:#86909C">2026年3月</div><div style="font-size:13px;color:#4E5969;margin-top:4px">开始时间将调整</div></div>'
+      +'</div>';
+  }
+}
+
+function saveModify(){
+  var s=document.getElementById('newStartTime').value;
+  var e=document.getElementById('newEndTime').value;
+  if(s>=e){
+    alert('开始时间必须早于结束时间，请重新选择');
+    return;
+  }
+  closeModifyDrawer();
+  showToast('<i class="bi bi-check-circle-fill" style="color:#00B42A;margin-right:8px"></i>满到满周期已修改，1月/2月/3月数据已重新计算');
+}
+
+function showToast(msg){
+  document.getElementById('toastBody').innerHTML=msg;
+  var t=new bootstrap.Toast(document.getElementById('toast'),{delay:3000});
+  t.show();
+}
+</script>
+</body>
+</html>

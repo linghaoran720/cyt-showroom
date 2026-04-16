@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>映射规则管理 - 财运通</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+*{box-sizing:border-box;}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#F2F3F5;margin:0;min-width:1280px;}
+.top-nav{height:48px;background:#2B2B6E;position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:0 16px;}
+.logo{color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;padding-right:16px;border-right:1px solid rgba(255,255,255,0.15);}
+.logo-icon{background:rgba(255,255,255,0.2);border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.nav-tab{color:rgba(255,255,255,0.7);padding:0 16px;height:48px;display:flex;align-items:center;font-size:14px;cursor:pointer;position:relative;}
+.nav-tab.active{color:#fff;}
+.nav-tab.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#fff;}
+.right-area{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.avatar{width:28px;height:28px;border-radius:50%;background:#5B5FC7;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;}
+.sidebar{width:160px;background:#fff;position:fixed;top:48px;left:0;bottom:0;border-right:1px solid #E5E6EB;z-index:90;}
+.menu-item{padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:14px;color:#4E5969;cursor:pointer;}
+.menu-item.active{color:#5B5FC7;font-weight:500;background:#F0F0FF;border-left:3px solid #5B5FC7;padding-left:13px;}
+.submenu-item{padding:8px 16px 8px 32px;font-size:13px;color:#4E5969;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.submenu-item.active{color:#5B5FC7;font-weight:500;background:#F0F0FF;}
+.submenu-item::before{content:'';width:4px;height:4px;border-radius:50%;background:#C9CDD4;}
+.submenu-item.active::before{background:#5B5FC7;}
+.main{margin-left:160px;margin-top:48px;padding:24px;}
+
+/* 页面标题 */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.page-title{font-size:16px;font-weight:600;color:#1D2129;}
+.breadcrumb-nav{font-size:13px;color:#86909C;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.breadcrumb-nav a{color:#165DFF;text-decoration:none;}
+
+/* 卡片 */
+.card-box{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+
+/* 筛选栏 */
+.filter-bar{padding:16px 24px;border-bottom:1px solid #E5E6EB;display:flex;align-items:center;gap:12px;}
+.search-input{height:32px;border:1px solid #E5E6EB;border-radius:4px;padding:0 12px;font-size:14px;color:#1D2129;width:240px;}
+.search-input:focus{outline:none;border-color:#165DFF;}
+.filter-tabs{display:flex;gap:4px;}
+.filter-tab{height:32px;padding:0 14px;border:1px solid #E5E6EB;border-radius:4px;font-size:13px;color:#4E5969;cursor:pointer;background:#fff;display:flex;align-items:center;}
+.filter-tab:hover{border-color:#165DFF;color:#165DFF;}
+.filter-tab.active{background:#E8F3FF;border-color:#165DFF;color:#165DFF;}
+.filter-bar .right{margin-left:auto;}
+.btn-primary-cyt{background:#165DFF;color:#fff;border:none;border-radius:4px;height:32px;padding:0 16px;font-size:14px;cursor:pointer;}
+.btn-primary-cyt:hover{background:#4080FF;}
+.btn-secondary-cyt{background:#fff;color:#4E5969;border:1px solid #E5E6EB;border-radius:4px;height:32px;padding:0 14px;font-size:14px;cursor:pointer;}
+.btn-secondary-cyt:hover{border-color:#165DFF;color:#165DFF;}
+
+/* 表格 */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{background:#F7F8FA;font-size:14px;font-weight:600;color:#1D2129;padding:12px 24px;border-bottom:1px solid #E5E6EB;text-align:left;white-space:nowrap;}
+.data-table td{font-size:14px;color:#4E5969;padding:14px 24px;border-bottom:1px solid #E5E6EB;vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:#F7F8FF;}
+.arrow-icon{color:#C9CDD4;margin:0 8px;}
+.usage-bar{display:flex;align-items:center;gap:8px;}
+.usage-bar .bar{height:6px;border-radius:3px;background:#E5E6EB;width:80px;overflow:hidden;}
+.usage-bar .bar-fill{height:100%;border-radius:3px;background:#165DFF;}
+.usage-num{font-size:13px;color:#86909C;white-space:nowrap;}
+.btn-del{background:none;border:none;color:#F53F3F;font-size:13px;cursor:pointer;padding:4px 8px;border-radius:4px;}
+.btn-del:hover{background:#FFECE8;}
+
+/* 分页 */
+.pagination-area{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #E5E6EB;}
+.pagination-info{font-size:13px;color:#86909C;}
+.pagination-btns{display:flex;gap:4px;}
+.page-btn{width:32px;height:32px;border:1px solid #E5E6EB;border-radius:4px;background:#fff;font-size:13px;color:#4E5969;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.page-btn:hover{border-color:#165DFF;color:#165DFF;}
+.page-btn.active{background:#165DFF;border-color:#165DFF;color:#fff;}
+
+/* 删除确认弹窗 */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);width:440px;}
+.modal-header{padding:16px 24px;border-bottom:1px solid #E5E6EB;display:flex;align-items:center;justify-content:space-between;}
+.modal-header h5{font-size:16px;font-weight:600;color:#1D2129;margin:0;}
+.modal-close{background:none;border:none;color:#86909C;cursor:pointer;font-size:20px;}
+.modal-body{padding:20px 24px;}
+.modal-footer-inner{padding:16px 24px;border-top:1px solid #E5E6EB;display:flex;justify-content:flex-end;gap:12px;}
+.del-info{background:#F7F8FA;border-radius:6px;padding:14px 16px;margin-bottom:14px;}
+.del-info .row{display:flex;gap:8px;font-size:14px;color:#4E5969;margin-bottom:6px;}
+.del-info .row:last-child{margin-bottom:0;}
+.del-info .label{color:#86909C;width:72px;flex-shrink:0;}
+.del-warn{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#FF7D00;background:#FFF9F0;border:1px solid #FFD591;border-radius:6px;padding:10px 14px;}
+.btn-danger-cyt{background:#F53F3F;color:#fff;border:none;border-radius:4px;height:32px;padding:0 16px;font-size:14px;cursor:pointer;}
+.btn-danger-cyt:hover{background:#cb2d2d;}
+
+/* 成功提示 */
+.toast{position:fixed;top:72px;right:24px;background:#fff;border:1px solid #E5E6EB;border-radius:8px;padding:12px 20px;box-shadow:0 4px 16px rgba(0,0,0,0.1);display:none;align-items:center;gap:10px;z-index:300;font-size:14px;color:#1D2129;}
+.toast.show{display:flex;}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="logo"><div class="logo-icon">G</div>财运通</div>
+  <div style="display:flex;align-items:center;margin-left:12px;">
+    <div class="nav-tab">首页</div>
+    <div class="nav-tab">运单管理</div>
+    <div class="nav-tab active">系统设置</div>
+  </div>
+  <div class="right-area">
+    <i class="bi bi-bell" style="color:rgba(255,255,255,0.7);font-size:18px;"></i>
+    <div class="avatar">李</div>
+  </div>
+</nav>
+
+<aside class="sidebar">
+  <div style="padding:12px;border-bottom:1px solid #F2F3F5;display:flex;align-items:center;gap:8px;">
+    <div class="avatar" style="width:36px;height:36px;font-size:14px;">李</div>
+    <div><div style="font-size:13px;font-weight:500;color:#1D2129;">李调度</div><div style="font-size:12px;color:#86909C;">浩瀚物流</div></div>
+  </div>
+  <div class="menu-item"><i class="bi bi-file-text"></i> 运单管理</div>
+  <div class="menu-item active"><i class="bi bi-gear"></i> 系统设置</div>
+  <div class="submenu-item">运单配置</div>
+  <div class="submenu-item active">智能识别</div>
+  <div class="menu-item"><i class="bi bi-bar-chart"></i> 报表中心</div>
+</aside>
+
+<main class="main">
+  <div class="breadcrumb-nav">
+    <span>系统设置</span>
+    <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+    <span>智能识别</span>
+    <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+    <span style="color:#1D2129;">映射规则管理</span>
+  </div>
+
+  <div class="page-header">
+    <div class="page-title">映射规则管理</div>
+  </div>
+
+  <div class="card-box">
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+      <input class="search-input" placeholder="🔍 搜索识别字段或系统字段..." oninput="filterTable(this.value)">
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterType('all',this)">全部</button>
+        <button class="filter-tab" onclick="filterType('waybill',this)">运单</button>
+        <button class="filter-tab" onclick="filterType('expense',this)">费用</button>
+      </div>
+      <div class="right">
+        <span style="font-size:13px;color:#86909C;margin-right:12px;">共 <strong id="totalRules">8</strong> 条规则</span>
+      </div>
+    </div>
+
+    <!-- 表格 -->
+    <div style="overflow-x:auto;">
+      <table class="data-table" id="rulesTable">
+        <thead>
+          <tr>
+            <th>识别字段</th>
+            <th></th>
+            <th>系统字段</th>
+            <th>使用次数</th>
+            <th>最近使用</th>
+            <th>创建人</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="rulesBody">
+          <tr data-type="waybill">
+            <td><strong>客户名称</strong></td>
+            <td><i class="bi bi-arrow-right arrow-icon"></i></td>
+            <td>客户名称</td>
+            <td>
+              <div class="usage-bar">
+                <div class="bar"><div class="bar-fill" style="width:78%;"></div></div>
+                <span class="usage-num">156 次</span>
+              </div>
+            </td>
+            <td>2026-03-24</td>
+            <td>李调度</td>
+            <td><button class="btn-del" onclick="showDeleteModal('客户名称','客户名称','156')"><i class="bi bi-trash"></i> 删除</button></td>
+          </tr>
+          <tr data-type="waybill">
+            <td><strong>发货地址</strong></td>
+            <td><i class="bi bi-arrow-right arrow-icon"></i></td>
+            <td>高德地址（发）</td>
+            <td>
+              <div class="usage-bar">
+                <div class="bar"><div class="bar-fill" style="width:100%;"></div></div>
+                <span class="usage-num">203 次</span>
+              </div>
+            </td>
+            <td>2026-03-24</td>
+            <td>系统自动</td>
+            <td><button class="btn-del" onclick="showDeleteModal('发货地址','高德地址（发）','203')"><i class="bi bi-trash"></i> 删除</button></td>
+          </tr>
+          <tr data-type="waybill">
+            <td><strong>收货地址</strong></td>
+            <td><i class="bi bi-arrow-right arrow-icon"></i></td>
+            <td>高德地址（收）</td>
+            <td>
+              <div class="usage-bar">
+                <div class="bar"><div class="bar-fill" style="width:99%;"></div></div>
+                <span class="usage-num">198 次</span>
+              </div>
+            </td>
+            <td>2026-03-23</td>
+            <td>系统自动</td>
+            <td><button class="btn-del" onclick="showDeleteModal('收货地址','高德地址（收）','198')"><i class="bi bi-trash"></i> 删除</button></td>
+          </tr>
+          <tr data-type="waybill">
+            <td><strong>货物名称</strong></td>
+            <td><i class="bi bi-arrow-right arrow-icon"></i></td>
+            <td>货物名称</td>
+            <td>
+              <div class="usage-bar">
+                <div class="bar"><div class="bar-fill" style="width:72%;"></div></div>
+                <span class="usage-num">145 次</span>
+              </div>
+            </td>
+            <td>2026-03-22</td>
+            <td>李调度</td>
+            <td><button class="btn-del" onclick="showDeleteModal('货物名称','货物名称','145')"><i class="bi bi-trash"></i> 删除</button></td>
+          </tr>
+          <tr data-type="waybill">
+            <td><strong>货物重量</strong></td>
+            <td><i class="bi bi-arrow-right arrow-icon"></i></td>
+            <td>重量(kg)</td>
+            <td>
+              <div class="usage-bar">
+                <div class="bar"><div class="bar-fill" style="width:44%;"></div></div>
+                <span class="usage-num">89 次</span>
+              </div>
+            </td>
+            <td>2026-03-20</td>
+            <td>系统自动</td>
+            <td><button class="btn-del" onclick="showDeleteModal('货物重量','重量(kg)','89')"><i class="bi bi-trash"></i> 删除</button></td>
+          </tr>
+          <tr data-type="waybill">
+            <td><strong>司机</strong></td>
+            <td><i class="bi bi-arrow-right arrow-icon"></i></td>
+            <td>主驾司机</td>
+            <td>
+              <div class="usage-bar">
+                <div class="bar"><div class="bar-fill" style="width:38%;"></div></div>
+                <span class="usage-num">76 次</span>
+              </div>
+            </td>
+            <td>2026-03-24</td>
+            <td>王主管</td>
+            <td><button class="btn-del" onclick="showDeleteModal('司机','主驾司机','76')"><i class="bi bi-trash"></i> 删除</button></td>
+          </tr>
+          <tr data-type="expense">
+            <td><strong>油费金额</strong></td>
+            <td><i class="bi bi-arrow-right arrow-icon"></i></td>
+            <td>油费</td>
+            <td>
+              <div class="usage-bar">
+                <div class="bar"><div class="bar-fill" style="width:25%;background:#FF7D00;"></div></div>
+                <span class="usage-num">50 次</span>
+              </div>
+            </td>
+            <td>2026-03-18</td>
+            <td>系统自动</td>
+            <td><button class="btn-del" onclick="showDeleteModal('油费金额','油费','50')"><i class="bi bi-trash"></i> 删除</button></td>
+          </tr>
+          <tr data-type="expense">
+            <td><strong>路桥费</strong></td>
+            <td><i class="bi bi-arrow-right arrow-icon"></i></td>
+            <td>路桥费</td>
+            <td>
+              <div class="usage-bar">
+                <div class="bar"><div class="bar-fill" style="width:20%;background:#FF7D00;"></div></div>
+                <span class="usage-num">40 次</span>
+              </div>
+            </td>
+            <td>2026-03-15</td>
+            <td>系统自动</td>
+            <td><button class="btn-del" onclick="showDeleteModal('路桥费','路桥费','40')"><i class="bi bi-trash"></i> 删除</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 分页 -->
+    <div class="pagination-area">
+      <div class="pagination-info">共 8 条，每页 20 条</div>
+      <div class="pagination-btns">
+        <button class="page-btn"><i class="bi bi-chevron-left"></i></button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 删除确认弹窗 -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h5><i class="bi bi-exclamation-triangle" style="color:#FF7D00;"></i> 删除映射规则</h5>
+      <button class="modal-close" onclick="closeDelete()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:#4E5969;margin-bottom:14px;">确认删除以下映射规则？</p>
+      <div class="del-info">
+        <div class="row"><span class="label">识别字段：</span><strong id="delSource">客户名称</strong></div>
+        <div class="row"><span class="label">系统字段：</span><strong id="delTarget">客户名称</strong></div>
+        <div class="row"><span class="label">使用次数：</span><span id="delCount">156</span> 次</div>
+      </div>
+      <div class="del-warn">
+        <i class="bi bi-exclamation-circle-fill" style="flex-shrink:0;margin-top:1px;"></i>
+        删除后，下次识别到该字段时需要重新手动映射
+      </div>
+    </div>
+    <div class="modal-footer-inner">
+      <button class="btn-secondary-cyt" onclick="closeDelete()">取消</button>
+      <button class="btn-danger-cyt" onclick="confirmDelete()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 成功提示 -->
+<div class="toast" id="toast">
+  <i class="bi bi-check-circle-fill" style="color:#00B42A;font-size:18px;"></i>
+  映射规则已删除
+</div>
+
+<script>
+let currentDeleteRow = null;
+
+function showDeleteModal(source, target, count) {
+  document.getElementById('delSource').textContent = source;
+  document.getElementById('delTarget').textContent = target;
+  document.getElementById('delCount').textContent = count;
+  document.getElementById('deleteModal').classList.add('show');
+  currentDeleteRow = source;
+}
+
+function closeDelete() {
+  document.getElementById('deleteModal').classList.remove('show');
+}
+
+function confirmDelete() {
+  closeDelete();
+  // 找到对应行并删除
+  const rows = document.querySelectorAll('#rulesBody tr');
+  rows.forEach(row => {
+    if (row.querySelector('strong') && row.querySelector('strong').textContent === currentDeleteRow) {
+      row.remove();
+    }
+  });
+  const remaining = document.querySelectorAll('#rulesBody tr').length;
+  document.getElementById('totalRules').textContent = remaining;
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function filterTable(val) {
+  const rows = document.querySelectorAll('#rulesBody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(val.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function filterType(type, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const rows = document.querySelectorAll('#rulesBody tr');
+  rows.forEach(row => {
+    if (type === 'all') row.style.display = '';
+    else row.style.display = row.dataset.type === type ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

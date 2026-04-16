@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>创建运单 - 财运通</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+* { box-sizing: border-box; }
+body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #F2F3F5; margin: 0; min-width: 1280px; }
+
+/* 顶部导航 */
+.top-nav { height: 48px; background: #2B2B6E; position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; padding: 0 16px; gap: 0; }
+.top-nav .logo { color: #fff; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding-right: 16px; border-right: 1px solid rgba(255,255,255,0.15); }
+.top-nav .logo-icon { background: rgba(255,255,255,0.2); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.top-nav .nav-tabs-top { display: flex; align-items: center; height: 48px; margin-left: 12px; }
+.top-nav .nav-tab { color: rgba(255,255,255,0.7); padding: 0 16px; height: 48px; display: flex; align-items: center; font-size: 14px; cursor: pointer; position: relative; }
+.top-nav .nav-tab.active { color: #fff; font-weight: 500; }
+.top-nav .nav-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #fff; }
+.top-nav .right-area { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.top-nav .search-box { background: rgba(255,255,255,0.15); border: none; border-radius: 4px; color: #fff; padding: 4px 12px; font-size: 13px; width: 180px; }
+.top-nav .search-box::placeholder { color: rgba(255,255,255,0.5); }
+.btn-create-order { background: #FF7D00; color: #fff; border: none; border-radius: 4px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+.btn-create-waybill { background: #00B42A; color: #fff; border: none; border-radius: 4px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+.top-nav .icon-btn { color: rgba(255,255,255,0.7); font-size: 18px; cursor: pointer; }
+.top-nav .user-info { color: rgba(255,255,255,0.9); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: #5B5FC7; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
+
+/* 左侧菜单 */
+.sidebar { width: 160px; background: #fff; position: fixed; top: 48px; left: 0; bottom: 0; border-right: 1px solid #E5E6EB; overflow-y: auto; z-index: 90; }
+.sidebar-user { padding: 12px; border-bottom: 1px solid #F2F3F5; display: flex; align-items: center; gap: 8px; }
+.sidebar-user .name { font-size: 13px; color: #1D2129; font-weight: 500; }
+.sidebar-user .org { font-size: 12px; color: #86909C; }
+.sidebar-search { padding: 8px 12px; }
+.sidebar-search input { width: 100%; border: 1px solid #E5E6EB; border-radius: 4px; padding: 4px 8px; font-size: 13px; color: #4E5969; }
+.menu-item { padding: 10px 16px; display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4E5969; cursor: pointer; }
+.menu-item:hover { background: #F7F8FA; }
+.menu-item.active { color: #5B5FC7; font-weight: 500; background: #F0F0FF; border-left: 3px solid #5B5FC7; padding-left: 13px; }
+.menu-item i { font-size: 16px; }
+.submenu-item { padding: 8px 16px 8px 32px; font-size: 13px; color: #4E5969; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.submenu-item:hover { color: #5B5FC7; }
+.submenu-item.active { color: #5B5FC7; font-weight: 500; background: #F0F0FF; }
+.submenu-item::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #C9CDD4; }
+.submenu-item.active::before { background: #5B5FC7; }
+
+/* 内容区 */
+.main { margin-left: 160px; margin-top: 48px; padding: 24px; min-height: calc(100vh - 48px); }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 16px; font-weight: 600; color: #1D2129; }
+
+/* 创建运单表单 */
+.form-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
+.form-section { padding: 20px 24px; border-bottom: 1px solid #E5E6EB; }
+.form-section:last-child { border-bottom: none; }
+.section-title { font-size: 14px; font-weight: 600; color: #1D2129; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-title .badge-required { font-size: 12px; color: #F53F3F; font-weight: 400; }
+.form-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+.form-row.row-3 { grid-template-columns: repeat(3, 1fr); }
+.form-row.row-2 { grid-template-columns: repeat(2, 1fr); }
+.form-group label { font-size: 14px; color: #4E5969; margin-bottom: 6px; display: block; }
+.form-group label .req { color: #F53F3F; margin-left: 2px; }
+.form-control { height: 32px; border: 1px solid #E5E6EB; border-radius: 4px; font-size: 14px; color: #1D2129; padding: 0 12px; width: 100%; }
+.form-control:focus { outline: none; border-color: #165DFF; }
+.form-control::placeholder { color: #C9CDD4; }
+.form-select-custom { height: 32px; border: 1px solid #E5E6EB; border-radius: 4px; font-size: 14px; color: #1D2129; padding: 0 12px; width: 100%; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386909C' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 10px center; appearance: none; cursor: pointer; }
+
+/* 智能识别按钮 */
+.ai-btn-area { margin-bottom: 20px; }
+.ai-btn { background: linear-gradient(135deg, #165DFF 0%, #722ED1 100%); color: #fff; border: none; border-radius: 6px; padding: 8px 20px; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(22,93,255,0.3); transition: all 0.2s; }
+.ai-btn:hover { box-shadow: 0 4px 12px rgba(22,93,255,0.4); transform: translateY(-1px); }
+.ai-btn i { font-size: 16px; }
+
+/* 智能识别弹窗 */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal-box { background: #fff; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); width: 600px; max-height: 80vh; display: flex; flex-direction: column; }
+.modal-header { padding: 16px 24px; border-bottom: 1px solid #E5E6EB; display: flex; align-items: center; justify-content: space-between; }
+.modal-header h5 { font-size: 16px; font-weight: 600; color: #1D2129; margin: 0; display: flex; align-items: center; gap: 8px; }
+.modal-close { background: none; border: none; color: #86909C; cursor: pointer; font-size: 20px; padding: 0; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid #E5E6EB; display: flex; justify-content: flex-end; gap: 12px; }
+
+/* 输入模式Tab */
+.input-mode-tabs { display: flex; border-bottom: 1px solid #E5E6EB; margin-bottom: 20px; }
+.mode-tab { padding: 10px 20px; font-size: 14px; color: #4E5969; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
+.mode-tab:hover { color: #165DFF; }
+.mode-tab.active { color: #165DFF; border-bottom-color: #165DFF; font-weight: 500; }
+
+/* 文字输入区 */
+.text-input-area textarea { width: 100%; height: 160px; border: 1px solid #E5E6EB; border-radius: 6px; padding: 12px; font-size: 14px; color: #1D2129; resize: none; font-family: inherit; }
+.text-input-area textarea:focus { outline: none; border-color: #165DFF; }
+.text-hint { font-size: 12px; color: #86909C; margin-top: 8px; line-height: 1.6; }
+.char-count { text-align: right; font-size: 12px; color: #86909C; margin-top: 4px; }
+
+/* 图片上传区 */
+.img-mode-area { display: none; }
+.waybill-upload-block { margin-bottom: 16px; }
+.waybill-label { font-size: 13px; font-weight: 500; color: #1D2129; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.waybill-label .del-waybill { font-size: 12px; color: #F53F3F; cursor: pointer; }
+.upload-slots { display: flex; gap: 12px; }
+.upload-slot { width: 120px; height: 90px; border: 1px dashed #C9CDD4; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; color: #86909C; gap: 6px; transition: all 0.2s; }
+.upload-slot:hover { border-color: #165DFF; color: #165DFF; background: #F5F9FF; }
+.upload-slot i { font-size: 22px; }
+.add-waybill-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #165DFF; cursor: pointer; padding: 6px 0; }
+.add-waybill-btn:hover { color: #4080FF; }
+
+/* 补充信息 */
+.supplement-area { margin-top: 16px; }
+.supplement-label { font-size: 13px; color: #4E5969; margin-bottom: 6px; }
+.supplement-area textarea { width: 100%; height: 60px; border: 1px solid #E5E6EB; border-radius: 4px; padding: 8px 12px; font-size: 13px; color: #1D2129; resize: none; font-family: inherit; }
+
+/* Excel上传区 */
+.excel-mode-area { display: none; }
+.excel-upload-box { border: 2px dashed #C9CDD4; border-radius: 8px; padding: 40px 24px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.excel-upload-box:hover { border-color: #165DFF; background: #F5F9FF; }
+.excel-upload-box i { font-size: 40px; color: #86909C; margin-bottom: 12px; display: block; }
+.excel-upload-box .upload-text { font-size: 14px; color: #4E5969; margin-bottom: 4px; }
+.excel-upload-box .upload-hint { font-size: 12px; color: #86909C; }
+.excel-upload-box .upload-link { color: #165DFF; cursor: pointer; }
+
+/* 底部操作 */
+.form-footer { padding: 16px 24px; background: #fff; border-top: 1px solid #E5E6EB; display: flex; justify-content: flex-end; gap: 12px; position: sticky; bottom: 0; border-radius: 0 0 8px 8px; }
+.btn-primary-cyt { background: #165DFF; color: #fff; border: none; border-radius: 4px; height: 32px; padding: 0 20px; font-size: 14px; cursor: pointer; }
+.btn-primary-cyt:hover { background: #4080FF; }
+.btn-secondary-cyt { background: #fff; color: #4E5969; border: 1px solid #E5E6EB; border-radius: 4px; height: 32px; padding: 0 16px; font-size: 14px; cursor: pointer; }
+.btn-secondary-cyt:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger-cyt { background: #F53F3F; color: #fff; border: none; border-radius: 4px; height: 32px; padding: 0 16px; font-size: 14px; cursor: pointer; }
+
+/* 识别中loading */
+.loading-area { text-align: center; padding: 40px 0; }
+.loading-area .spinner { width: 40px; height: 40px; border: 3px solid #E5E6EB; border-top-color: #165DFF; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-area p { font-size: 14px; color: #4E5969; }
+
+/* tag */
+.tag-blue { background: #E8F3FF; color: #165DFF; font-size: 12px; padding: 2px 8px; border-radius: 2px; }
+.tag-green { background: #E8FFEA; color: #00B42A; font-size: 12px; padding: 2px 8px; border-radius: 2px; }
+.tag-orange { background: #FFF3E0; color: #FF7D00; font-size: 12px; padding: 2px 8px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<nav class="top-nav">
+  <div class="logo">
+    <div class="logo-icon">G</div>
+    财运通
+  </div>
+  <div class="nav-tabs-top">
+    <div class="nav-tab">首页</div>
+    <div class="nav-tab active">运单管理</div>
+    <div class="nav-tab">调度中心</div>
+    <div class="nav-tab">在途管理</div>
+    <div class="nav-tab">结算中心 <i class="bi bi-chevron-down" style="font-size:11px;margin-left:2px;"></i></div>
+  </div>
+  <div class="right-area">
+    <input class="search-box" placeholder="🔍 搜索功能...">
+    <button class="btn-create-order">创建订单</button>
+    <button class="btn-create-waybill" onclick="openAiModal()">✦ 创建运单</button>
+    <i class="bi bi-bell icon-btn"></i>
+    <i class="bi bi-gear icon-btn"></i>
+    <div class="user-info">
+      <div class="avatar">李</div>
+      李调度
+    </div>
+  </div>
+</nav>
+
+<!-- 左侧菜单 -->
+<aside class="sidebar">
+  <div class="sidebar-user">
+    <div class="avatar" style="width:36px;height:36px;font-size:14px;">李</div>
+    <div>
+      <div class="name">李调度</div>
+      <div class="org">浩瀚物流</div>
+    </div>
+  </div>
+  <div class="sidebar-search">
+    <input placeholder="🔍 快捷搜索" style="border:1px solid #E5E6EB;border-radius:4px;padding:4px 8px;width:100%;font-size:13px;">
+  </div>
+  <div class="menu-item"><i class="bi bi-house"></i> 首页</div>
+  <div class="menu-item active"><i class="bi bi-file-text"></i> 运单管理</div>
+  <div class="submenu-item">运单列表</div>
+  <div class="submenu-item active">创建运单</div>
+  <div class="menu-item"><i class="bi bi-truck"></i> 调度中心</div>
+  <div class="menu-item"><i class="bi bi-geo-alt"></i> 在途管理</div>
+  <div class="menu-item"><i class="bi bi-cash-stack"></i> 结算中心</div>
+  <div class="menu-item"><i class="bi bi-bar-chart"></i> 报表中心</div>
+  <div class="menu-item"><i class="bi bi-gear"></i> 系统设置</div>
+  <div class="submenu-item">运单配置</div>
+  <div class="submenu-item">智能识别</div>
+</aside>
+
+<!-- 内容区 -->
+<main class="main">
+  <div class="page-header">
+    <div class="page-title">创建运单</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <!-- 智能识别入口 -->
+      <button class="ai-btn" onclick="openAiModal()">
+        <i class="bi bi-stars"></i>
+        智能识别建单
+      </button>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <!-- 基本信息 -->
+    <div class="form-section">
+      <div class="section-title">基本信息</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>客户名称 <span class="req">*</span></label>
+          <input class="form-control" placeholder="请输入或选择客户">
+        </div>
+        <div class="form-group">
+          <label>项目名称</label>
+          <input class="form-control" placeholder="请选择项目">
+        </div>
+        <div class="form-group">
+          <label>业务类型 <span class="req">*</span></label>
+          <select class="form-select-custom">
+            <option>请选择</option>
+            <option>整车</option>
+            <option>零担</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>运单日期 <span class="req">*</span></label>
+          <input class="form-control" type="date" value="2026-03-24">
+        </div>
+      </div>
+    </div>
+
+    <!-- 线路信息 -->
+    <div class="form-section">
+      <div class="section-title">线路信息</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>发货地址 <span class="req">*</span></label>
+          <input class="form-control" placeholder="请输入发货地址">
+        </div>
+        <div class="form-group">
+          <label>收货地址 <span class="req">*</span></label>
+          <input class="form-control" placeholder="请输入收货地址">
+        </div>
+        <div class="form-group">
+          <label>预计发货时间</label>
+          <input class="form-control" type="datetime-local">
+        </div>
+        <div class="form-group">
+          <label>预计到达时间</label>
+          <input class="form-control" type="datetime-local">
+        </div>
+      </div>
+    </div>
+
+    <!-- 货物信息 -->
+    <div class="form-section">
+      <div class="section-title">货物信息</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>货物名称 <span class="req">*</span></label>
+          <input class="form-control" placeholder="请输入货物名称">
+        </div>
+        <div class="form-group">
+          <label>重量(kg)</label>
+          <input class="form-control" placeholder="请输入重量">
+        </div>
+        <div class="form-group">
+          <label>体积(m³)</label>
+          <input class="form-control" placeholder="请输入体积">
+        </div>
+        <div class="form-group">
+          <label>件数</label>
+          <input class="form-control" placeholder="请输入件数">
+        </div>
+      </div>
+    </div>
+
+    <!-- 车辆司机信息 -->
+    <div class="form-section">
+      <div class="section-title">车辆 / 司机</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>车牌号</label>
+          <input class="form-control" placeholder="请输入车牌号">
+        </div>
+        <div class="form-group">
+          <label>挂车号</label>
+          <input class="form-control" placeholder="请输入挂车号">
+        </div>
+        <div class="form-group">
+          <label>主驾司机</label>
+          <input class="form-control" placeholder="请输入司机姓名">
+        </div>
+        <div class="form-group">
+          <label>副驾司机</label>
+          <input class="form-control" placeholder="请输入副驾姓名">
+        </div>
+      </div>
+    </div>
+
+    <!-- 备注 -->
+    <div class="form-section">
+      <div class="section-title">备注</div>
+      <div class="form-row row-2">
+        <div class="form-group" style="grid-column:1/-1;">
+          <textarea class="form-control" style="height:72px;resize:none;" placeholder="请输入备注信息"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部操作 -->
+    <div class="form-footer">
+      <button class="btn-secondary-cyt">取消</button>
+      <button class="btn-secondary-cyt">保存草稿</button>
+      <button class="btn-primary-cyt">提交创建</button>
+    </div>
+  </div>
+</main>
+
+<!-- 智能识别弹窗 -->
+<div class="modal-overlay" id="aiModal">
+  <div class="modal-box" style="width:680px;">
+    <div class="modal-header">
+      <h5><i class="bi bi-stars" style="color:#165DFF;"></i> 智能识别建单</h5>
+      <button class="modal-close" onclick="closeAiModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body">
+      <!-- 输入模式Tab -->
+      <div class="input-mode-tabs">
+        <div class="mode-tab active" onclick="switchMode('text', this)"><i class="bi bi-textarea-t"></i> 文字建单</div>
+        <div class="mode-tab" onclick="switchMode('image', this)"><i class="bi bi-image"></i> 图片建单</div>
+        <div class="mode-tab" onclick="switchMode('excel', this)"><i class="bi bi-file-earmark-spreadsheet"></i> Excel建单</div>
+      </div>
+
+      <!-- 文字模式 -->
+      <div id="mode-text" class="text-input-area">
+        <textarea id="textInput" placeholder="请输入或粘贴运单信息，支持任意格式...
+
+示例：
+客户：顺丰速运
+发货地：北京朝阳区望京街道
+收货地：上海浦东新区张江高科
+货物：电子产品 100kg 50件
+司机：张三  车牌：京A12345" oninput="updateCharCount(this)"></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 1000</div>
+        <div class="text-hint">
+          <i class="bi bi-info-circle"></i>
+          支持任意文字格式，AI 将自动识别运单字段。如包含多个运单，AI 将自动拆分为批量识别。
+        </div>
+      </div>
+
+      <!-- 图片模式 -->
+      <div id="mode-image" class="img-mode-area">
+        <div id="waybillList">
+          <div class="waybill-upload-block">
+            <div class="waybill-label">
+              <span>运单 1</span>
+              <span class="del-waybill" onclick="delWaybill(this)">删除</span>
+            </div>
+            <div class="upload-slots">
+              <div class="upload-slot" onclick="fakeUpload(this)">
+                <i class="bi bi-camera"></i>
+                <span>上传图片1</span>
+              </div>
+              <div class="upload-slot" onclick="fakeUpload(this)">
+                <i class="bi bi-camera"></i>
+                <span>上传图片2</span>
+              </div>
+            </div>
+          </div>
+          <div class="waybill-upload-block">
+            <div class="waybill-label">
+              <span>运单 2</span>
+              <span class="del-waybill" onclick="delWaybill(this)">删除</span>
+            </div>
+            <div class="upload-slots">
+              <div class="upload-slot" onclick="fakeUpload(this)">
+                <i class="bi bi-camera"></i>
+                <span>上传图片1</span>
+              </div>
+              <div class="upload-slot" onclick="fakeUpload(this)">
+                <i class="bi bi-camera"></i>
+                <span>上传图片2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="add-waybill-btn" onclick="addWaybill()">
+          <i class="bi bi-plus-circle"></i> 添加更多运单
+        </div>
+        <div class="supplement-area">
+          <div class="supplement-label">补充信息（可选）</div>
+          <textarea placeholder="可输入司机、挂车、副驾等补充信息，将自动应用到所有运单..."></textarea>
+        </div>
+      </div>
+
+      <!-- Excel模式 -->
+      <div id="mode-excel" class="excel-mode-area">
+        <div class="excel-upload-box" onclick="fakeExcelUpload()">
+          <i class="bi bi-file-earmark-spreadsheet"></i>
+          <div class="upload-text">点击或拖拽 Excel 文件到此处</div>
+          <div class="upload-hint">支持 .xlsx .xls 格式，<span class="upload-link">最多100行数据</span></div>
+        </div>
+        <div class="text-hint" style="margin-top:12px;">
+          <i class="bi bi-info-circle"></i>
+          要求：第一行为表头，一行 = 一个运单。超过100行自动截取前100行。
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary-cyt" onclick="closeAiModal()">取消</button>
+      <button class="btn-primary-cyt" onclick="startRecognize()"><i class="bi bi-stars"></i> 开始识别</button>
+    </div>
+  </div>
+</div>
+
+<!-- 识别中弹窗 -->
+<div class="modal-overlay" id="loadingModal">
+  <div class="modal-box" style="width:400px;">
+    <div class="modal-body">
+      <div class="loading-area">
+        <div class="spinner"></div>
+        <p>AI 识别中，请稍候...</p>
+        <p style="font-size:12px;color:#86909C;">正在提取字段并匹配映射规则</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let waybillCount = 2;
+
+function openAiModal() {
+  document.getElementById('aiModal').classList.add('show');
+}
+function closeAiModal() {
+  document.getElementById('aiModal').classList.remove('show');
+}
+
+function switchMode(mode, el) {
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('mode-text').style.display = 'none';
+  document.getElementById('mode-image').style.display = 'none';
+  document.getElementById('mode-excel').style.display = 'none';
+  if (mode === 'text') document.getElementById('mode-text').style.display = 'block';
+  if (mode === 'image') document.getElementById('mode-image').style.display = 'block';
+  if (mode === 'excel') document.getElementById('mode-excel').style.display = 'block';
+}
+
+function updateCharCount(el) {
+  document.getElementById('charCount').textContent = el.value.length;
+}
+
+function fakeUpload(slot) {
+  slot.innerHTML = '<i class="bi bi-check-circle-fill" style="color:#00B42A;font-size:22px;"></i><span style="color:#00B42A;">已上传</span>';
+  slot.style.borderColor = '#00B42A';
+  slot.style.background = '#F0FFF4';
+}
+
+function fakeExcelUpload() {
+  document.querySelector('.excel-upload-box').innerHTML = `
+    <i class="bi bi-file-earmark-spreadsheet" style="color:#00B42A;"></i>
+    <div class="upload-text" style="color:#00B42A;">客户订单-20260324.xlsx</div>
+    <div class="upload-hint">共 3 行数据 · <span style="color:#165DFF;cursor:pointer;">重新选择</span></div>
+  `;
+}
+
+function addWaybill() {
+  waybillCount++;
+  const list = document.getElementById('waybillList');
+  const block = document.createElement('div');
+  block.className = 'waybill-upload-block';
+  block.innerHTML = `
+    <div class="waybill-label">
+      <span>运单 ${waybillCount}</span>
+      <span class="del-waybill" onclick="delWaybill(this)">删除</span>
+    </div>
+    <div class="upload-slots">
+      <div class="upload-slot" onclick="fakeUpload(this)"><i class="bi bi-camera"></i><span>上传图片1</span></div>
+      <div class="upload-slot" onclick="fakeUpload(this)"><i class="bi bi-camera"></i><span>上传图片2</span></div>
+    </div>
+  `;
+  list.appendChild(block);
+}
+
+function delWaybill(el) {
+  el.closest('.waybill-upload-block').remove();
+}
+
+function startRecognize() {
+  closeAiModal();
+  document.getElementById('loadingModal').classList.add('show');
+  setTimeout(() => {
+    document.getElementById('loadingModal').classList.remove('show');
+    // 跳转到识别结果页
+    const activeTab = document.querySelector('.mode-tab.active').textContent.trim();
+    if (activeTab.includes('文字') || activeTab.includes('图片')) {
+      window.location.href = 'single-result.html';
+    } else {
+      window.location.href = 'batch-table.html';
+    }
+  }, 1800);
+}
+</script>
+</body>
+</html>

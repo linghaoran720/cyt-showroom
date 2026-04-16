@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>批量识别结果 - 财运通</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+*{box-sizing:border-box;}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#F2F3F5;margin:0;min-width:1280px;}
+.top-nav{height:48px;background:#2B2B6E;position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:0 16px;gap:0;}
+.top-nav .logo{color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;padding-right:16px;border-right:1px solid rgba(255,255,255,0.15);}
+.logo-icon{background:rgba(255,255,255,0.2);border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.nav-tab{color:rgba(255,255,255,0.7);padding:0 16px;height:48px;display:flex;align-items:center;font-size:14px;cursor:pointer;position:relative;}
+.nav-tab.active{color:#fff;}
+.nav-tab.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#fff;}
+.right-area{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.btn-create-waybill{background:#00B42A;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:13px;cursor:pointer;}
+.avatar{width:28px;height:28px;border-radius:50%;background:#5B5FC7;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;}
+.sidebar{width:160px;background:#fff;position:fixed;top:48px;left:0;bottom:0;border-right:1px solid #E5E6EB;z-index:90;}
+.menu-item{padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:14px;color:#4E5969;cursor:pointer;}
+.menu-item.active{color:#5B5FC7;font-weight:500;background:#F0F0FF;border-left:3px solid #5B5FC7;padding-left:13px;}
+.submenu-item{padding:8px 16px 8px 32px;font-size:13px;color:#4E5969;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.submenu-item.active{color:#5B5FC7;font-weight:500;background:#F0F0FF;}
+.submenu-item::before{content:'';width:4px;height:4px;border-radius:50%;background:#C9CDD4;}
+.submenu-item.active::before{background:#5B5FC7;}
+.main{margin-left:160px;margin-top:48px;padding:0;height:calc(100vh - 48px);display:flex;flex-direction:column;}
+
+/* 弹窗样式（全屏弹窗） */
+.batch-modal{flex:1;display:flex;flex-direction:column;background:#fff;margin:16px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.08);overflow:hidden;}
+.batch-header{padding:14px 24px;border-bottom:1px solid #E5E6EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.batch-header .title{font-size:16px;font-weight:600;color:#1D2129;display:flex;align-items:center;gap:8px;}
+.batch-header .meta{font-size:13px;color:#86909C;}
+.batch-header .actions{display:flex;gap:10px;}
+.btn-primary-cyt{background:#165DFF;color:#fff;border:none;border-radius:4px;height:32px;padding:0 16px;font-size:14px;cursor:pointer;}
+.btn-primary-cyt:hover{background:#4080FF;}
+.btn-secondary-cyt{background:#fff;color:#4E5969;border:1px solid #E5E6EB;border-radius:4px;height:32px;padding:0 14px;font-size:14px;cursor:pointer;}
+.btn-secondary-cyt:hover{border-color:#165DFF;color:#165DFF;}
+.btn-danger-text{background:none;border:none;color:#F53F3F;font-size:13px;cursor:pointer;padding:0 4px;}
+.btn-danger-text:hover{color:#cb2d2d;}
+
+/* 原始内容区 */
+.source-area{padding:12px 24px;background:#F7F8FA;border-bottom:1px solid #E5E6EB;flex-shrink:0;}
+.source-label{font-size:12px;color:#86909C;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.source-preview{display:flex;align-items:center;gap:12px;}
+.source-img{width:80px;height:56px;border:1px solid #E5E6EB;border-radius:4px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#86909C;cursor:pointer;flex-direction:column;gap:4px;}
+.source-img:hover{border-color:#165DFF;color:#165DFF;}
+.source-img i{font-size:20px;}
+
+/* 双表头表格 */
+.table-area{flex:1;overflow:auto;padding:0;}
+.dual-header-table{width:100%;border-collapse:collapse;min-width:1200px;}
+
+/* 一级表头（系统字段）*/
+.th-level1{background:#F7F8FA;font-size:13px;font-weight:600;color:#1D2129;padding:10px 12px;border:1px solid #E5E6EB;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:10;}
+.th-level1.th-no{width:52px;text-align:center;}
+.th-level1.th-action{width:72px;text-align:center;}
+
+/* 二级表头（识别字段）*/
+.th-level2{background:#FAFBFF;font-size:12px;color:#4E5969;padding:6px 12px;border:1px solid #E5E6EB;position:sticky;top:41px;z-index:10;}
+.th-level2 .map-row{display:flex;align-items:center;gap:4px;}
+.map-select{height:26px;border:1px solid #E5E6EB;border-radius:4px;font-size:12px;color:#1D2129;padding:0 22px 0 8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%2386909C' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 6px center;appearance:none;cursor:pointer;max-width:130px;}
+.map-select:focus{outline:none;border-color:#165DFF;}
+.map-select.unmapped{background-color:#FFF9F0;border-color:#FFD591;color:#86909C;}
+.clear-map{color:#C9CDD4;cursor:pointer;font-size:14px;flex-shrink:0;}
+.clear-map:hover{color:#F53F3F;}
+
+/* 数据行 */
+.td-cell{padding:6px 12px;border:1px solid #E5E6EB;font-size:13px;color:#1D2129;vertical-align:middle;}
+.td-cell input{width:100%;height:28px;border:1px solid transparent;border-radius:4px;font-size:13px;color:#1D2129;padding:0 8px;background:transparent;font-family:inherit;}
+.td-cell input:hover{border-color:#E5E6EB;background:#fff;}
+.td-cell input:focus{outline:none;border-color:#165DFF;background:#fff;}
+.td-cell.td-no{text-align:center;font-size:12px;color:#86909C;background:#FAFAFA;}
+.td-cell.td-action{text-align:center;}
+tr:hover .td-cell{background:#F7F8FF;}
+tr:hover .td-cell.td-no{background:#F7F8FF;}
+.row-deleted{display:none;}
+
+/* 底部操作 */
+.batch-footer{padding:14px 24px;border-top:1px solid #E5E6EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#fff;}
+.footer-stats{font-size:13px;color:#4E5969;display:flex;align-items:center;gap:16px;}
+.stat-item{display:flex;align-items:center;gap:4px;}
+.stat-item .num{font-size:16px;font-weight:600;color:#1D2129;}
+.stat-item .dot-green{color:#00B42A;}
+.stat-item .dot-orange{color:#FF7D00;}
+
+/* 冲突弹窗 */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);width:460px;}
+.modal-header{padding:16px 24px;border-bottom:1px solid #E5E6EB;display:flex;align-items:center;justify-content:space-between;}
+.modal-header h5{font-size:16px;font-weight:600;color:#1D2129;margin:0;}
+.modal-close{background:none;border:none;color:#86909C;cursor:pointer;font-size:20px;}
+.modal-body{padding:20px 24px;}
+.modal-footer-inner{padding:16px 24px;border-top:1px solid #E5E6EB;display:flex;justify-content:flex-end;gap:12px;}
+.conflict-box{background:#FFF9F0;border:1px solid #FFD591;border-radius:6px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#4E5969;line-height:1.8;}
+.radio-group{display:flex;flex-direction:column;gap:12px;}
+.radio-item{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+.radio-item input{margin-top:3px;accent-color:#165DFF;}
+.radio-label{font-size:14px;color:#1D2129;}
+.radio-desc{font-size:12px;color:#86909C;margin-top:2px;}
+
+/* 结果弹窗 */
+.result-modal-box{background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);width:600px;}
+.result-table{width:100%;border-collapse:collapse;}
+.result-table th{background:#F7F8FA;font-size:13px;font-weight:600;color:#1D2129;padding:10px 14px;border:1px solid #E5E6EB;}
+.result-table td{font-size:13px;color:#4E5969;padding:10px 14px;border:1px solid #E5E6EB;}
+.tag-success{background:#E8FFEA;color:#00B42A;font-size:12px;padding:2px 8px;border-radius:2px;}
+.tag-fail{background:#FFECE8;color:#F53F3F;font-size:12px;padding:2px 8px;border-radius:2px;}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="logo"><div class="logo-icon">G</div>财运通</div>
+  <div style="display:flex;align-items:center;margin-left:12px;">
+    <div class="nav-tab">首页</div>
+    <div class="nav-tab active">运单管理</div>
+    <div class="nav-tab">调度中心</div>
+  </div>
+  <div class="right-area">
+    <button class="btn-create-waybill">✦ 创建运单</button>
+    <i class="bi bi-bell" style="color:rgba(255,255,255,0.7);font-size:18px;"></i>
+    <div class="avatar">李</div>
+  </div>
+</nav>
+
+<aside class="sidebar">
+  <div style="padding:12px;border-bottom:1px solid #F2F3F5;display:flex;align-items:center;gap:8px;">
+    <div class="avatar" style="width:36px;height:36px;font-size:14px;">李</div>
+    <div><div style="font-size:13px;font-weight:500;color:#1D2129;">李调度</div><div style="font-size:12px;color:#86909C;">浩瀚物流</div></div>
+  </div>
+  <div class="menu-item active"><i class="bi bi-file-text"></i> 运单管理</div>
+  <div class="submenu-item">运单列表</div>
+  <div class="submenu-item active">创建运单</div>
+  <div class="menu-item"><i class="bi bi-truck"></i> 调度中心</div>
+</aside>
+
+<main class="main">
+  <div class="batch-modal">
+
+    <!-- 弹窗头部 -->
+    <div class="batch-header">
+      <div>
+        <div class="title"><i class="bi bi-stars" style="color:#165DFF;"></i> 批量识别结果 <span style="font-size:14px;color:#86909C;font-weight:400;" id="waybillCount">（3 个运单）</span></div>
+        <div class="meta" style="margin-top:4px;"><i class="bi bi-info-circle"></i> 一级表头为系统字段，二级表头为识别字段，可调整映射关系，内容区可直接编辑</div>
+      </div>
+      <div class="actions">
+        <a href="index.html"><button class="btn-secondary-cyt"><i class="bi bi-arrow-left"></i> 返回</button></a>
+        <button class="btn-secondary-cyt" onclick="exportExcel()"><i class="bi bi-download"></i> 导出Excel</button>
+        <button class="btn-primary-cyt" onclick="showResult()"><i class="bi bi-check-lg"></i> 批量创建运单</button>
+      </div>
+    </div>
+
+    <!-- 原始内容只读区 -->
+    <div class="source-area">
+      <div class="source-label"><i class="bi bi-paperclip"></i> 原始输入内容（只读）</div>
+      <div class="source-preview">
+        <div class="source-img" title="点击放大">
+          <i class="bi bi-file-image"></i>
+          <span>运单1图片</span>
+        </div>
+        <div class="source-img" title="点击放大">
+          <i class="bi bi-file-image"></i>
+          <span>运单2图片</span>
+        </div>
+        <div class="source-img" title="点击放大">
+          <i class="bi bi-file-image"></i>
+          <span>运单3图片</span>
+        </div>
+        <div style="margin-left:8px;font-size:12px;color:#86909C;border-left:1px solid #E5E6EB;padding-left:16px;">
+          补充信息：司机 张三 · 挂车 京B99999
+        </div>
+      </div>
+    </div>
+
+    <!-- 双表头表格 -->
+    <div class="table-area">
+      <table class="dual-header-table" id="batchTable">
+        <thead>
+          <!-- 一级表头：系统字段 -->
+          <tr>
+            <th class="th-level1 th-no">序号</th>
+            <th class="th-level1">客户名称</th>
+            <th class="th-level1">项目名称</th>
+            <th class="th-level1">高德地址（发）</th>
+            <th class="th-level1">高德地址（收）</th>
+            <th class="th-level1">货物名称</th>
+            <th class="th-level1">重量(kg)</th>
+            <th class="th-level1">车牌号</th>
+            <th class="th-level1">主驾司机</th>
+            <th class="th-level1">挂车号</th>
+            <th class="th-level1">备注</th>
+            <th class="th-level1 th-action">操作</th>
+          </tr>
+          <!-- 二级表头：识别字段 -->
+          <tr>
+            <th class="th-level2 th-no" style="text-align:center;font-size:11px;color:#C9CDD4;">识别字段</th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select" onchange="checkMappingConflict(this,'客户名称','customer_name')">
+                  <option value="customer_name" selected>客户</option>
+                  <option value="project_name">合同名称</option>
+                  <option value="">— 不映射 —</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select" onchange="checkMappingConflict(this,'项目名称','project_name')">
+                  <option value="project_name" selected>合同名称</option>
+                  <option value="customer_name">客户</option>
+                  <option value="">— 不映射 —</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select" onchange="checkMappingConflict(this,'发货地址','origin')">
+                  <option value="origin" selected>发货地址</option>
+                  <option value="">— 不映射 —</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select" onchange="checkMappingConflict(this,'收货地址','dest')">
+                  <option value="dest" selected>收货地址</option>
+                  <option value="">— 不映射 —</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select" onchange="checkMappingConflict(this,'货物名称','goods')">
+                  <option value="goods" selected>货物</option>
+                  <option value="">— 不映射 —</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select" onchange="checkMappingConflict(this,'重量','weight')">
+                  <option value="weight" selected>重量kg</option>
+                  <option value="">— 不映射 —</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select unmapped">
+                  <option value="" selected>— 请选择 —</option>
+                  <option value="plate">车牌号</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select" onchange="checkMappingConflict(this,'主驾','driver')">
+                  <option value="driver" selected>司机</option>
+                  <option value="">— 不映射 —</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select" onchange="checkMappingConflict(this,'挂车','trailer')">
+                  <option value="trailer" selected>挂车</option>
+                  <option value="">— 不映射 —</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2">
+              <div class="map-row">
+                <select class="map-select unmapped">
+                  <option value="" selected>— 请选择 —</option>
+                  <option value="remark">备注</option>
+                </select>
+                <i class="bi bi-x clear-map" onclick="clearMap(this)" title="清空映射"></i>
+              </div>
+            </th>
+            <th class="th-level2 th-action"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr id="row1">
+            <td class="td-cell td-no">1</td>
+            <td class="td-cell"><input type="text" value="顺丰速运（上海）有限公司"></td>
+            <td class="td-cell"><input type="text" value="沪宁物流合同2026"></td>
+            <td class="td-cell"><input type="text" value="北京市朝阳区望京街道"></td>
+            <td class="td-cell"><input type="text" value="上海市浦东新区张江高科"></td>
+            <td class="td-cell"><input type="text" value="电子产品"></td>
+            <td class="td-cell"><input type="text" value="1250"></td>
+            <td class="td-cell"><input type="text" placeholder="未识别，请手动输入" style="color:#C9CDD4;"></td>
+            <td class="td-cell"><input type="text" value="张三"></td>
+            <td class="td-cell"><input type="text" value="京B99999"></td>
+            <td class="td-cell"><input type="text" placeholder="请输入备注"></td>
+            <td class="td-cell td-action"><button class="btn-danger-text" onclick="deleteRow('row1')"><i class="bi bi-trash"></i></button></td>
+          </tr>
+          <tr id="row2">
+            <td class="td-cell td-no">2</td>
+            <td class="td-cell"><input type="text" value="京东物流股份有限公司"></td>
+            <td class="td-cell"><input type="text" value="京沪运输框架合同"></td>
+            <td class="td-cell"><input type="text" value="上海市浦东新区川沙路"></td>
+            <td class="td-cell"><input type="text" value="广州市天河区珠江新城"></td>
+            <td class="td-cell"><input type="text" value="服装辅料"></td>
+            <td class="td-cell"><input type="text" value="860"></td>
+            <td class="td-cell"><input type="text" placeholder="未识别，请手动输入" style="color:#C9CDD4;"></td>
+            <td class="td-cell"><input type="text" value="张三"></td>
+            <td class="td-cell"><input type="text" value="京B99999"></td>
+            <td class="td-cell"><input type="text" placeholder="请输入备注"></td>
+            <td class="td-cell td-action"><button class="btn-danger-text" onclick="deleteRow('row2')"><i class="bi bi-trash"></i></button></td>
+          </tr>
+          <tr id="row3">
+            <td class="td-cell td-no">3</td>
+            <td class="td-cell"><input type="text" value="圆通速递有限公司"></td>
+            <td class="td-cell"><input type="text" value="粤港快递合作合同"></td>
+            <td class="td-cell"><input type="text" value="广州市天河区林和中路"></td>
+            <td class="td-cell"><input type="text" value="深圳市南山区科技园"></td>
+            <td class="td-cell"><input type="text" value="食品（冷链）"></td>
+            <td class="td-cell"><input type="text" value="2100"></td>
+            <td class="td-cell"><input type="text" placeholder="未识别，请手动输入" style="color:#C9CDD4;"></td>
+            <td class="td-cell"><input type="text" value="张三"></td>
+            <td class="td-cell"><input type="text" value="京B99999"></td>
+            <td class="td-cell"><input type="text" placeholder="请输入备注"></td>
+            <td class="td-cell td-action"><button class="btn-danger-text" onclick="deleteRow('row3')"><i class="bi bi-trash"></i></button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 底部统计 -->
+    <div class="batch-footer">
+      <div class="footer-stats">
+        <div class="stat-item"><span class="num" id="totalCount">3</span><span style="margin-left:4px;color:#86909C;">条运单</span></div>
+        <div class="stat-item dot-orange"><i class="bi bi-exclamation-circle"></i><span style="margin-left:4px;">1 列未映射（车牌号、备注）</span></div>
+      </div>
+      <div class="actions" style="display:flex;gap:10px;">
+        <a href="index.html"><button class="btn-secondary-cyt">返回修改</button></a>
+        <button class="btn-primary-cyt" onclick="showResult()"><i class="bi bi-check-lg"></i> 批量创建运单（<span id="btnCount">3</span>个）</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 映射冲突弹窗 -->
+<div class="modal-overlay" id="conflictModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h5><i class="bi bi-exclamation-triangle" style="color:#FF7D00;"></i> 映射冲突</h5>
+      <button class="modal-close" onclick="closeConflict()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="conflict-box">
+        识别字段 <strong>「客户名称」</strong> 已有映射规则：<br>
+        原映射：客户名称 → <span style="color:#00B42A;">客户名称</span><br>
+        新映射：客户名称 → <span style="color:#165DFF;">项目名称</span>
+      </div>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="conflictChoice" value="once" checked>
+          <div>
+            <div class="radio-label">仅本次生效</div>
+            <div class="radio-desc">本次创建运单使用新映射，不更新映射规则库</div>
+          </div>
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="conflictChoice" value="update">
+          <div>
+            <div class="radio-label">更新映射规则（全集团生效）</div>
+            <div class="radio-desc">所有运单及后续识别均使用新映射</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer-inner">
+      <button class="btn-secondary-cyt" onclick="closeConflict()">取消</button>
+      <button class="btn-primary-cyt" onclick="closeConflict()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- 创建结果弹窗 -->
+<div class="modal-overlay" id="resultModal">
+  <div class="result-modal-box">
+    <div class="modal-header">
+      <h5><i class="bi bi-check-circle" style="color:#00B42A;"></i> 批量创建结果</h5>
+      <button class="modal-close" onclick="closeResult()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div style="padding:20px 24px;">
+      <div style="display:flex;gap:24px;margin-bottom:16px;">
+        <div style="font-size:13px;color:#4E5969;">总计：<strong style="color:#1D2129;">3</strong> 个</div>
+        <div style="font-size:13px;color:#00B42A;">成功：<strong>2</strong> 个</div>
+        <div style="font-size:13px;color:#F53F3F;">失败：<strong>1</strong> 个</div>
+      </div>
+      <table class="result-table">
+        <thead><tr><th>序号</th><th>客户名称</th><th>状态</th><th>运单号 / 失败原因</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>顺丰速运</td><td><span class="tag-success">✓ 成功</span></td><td>RW2603240001</td></tr>
+          <tr><td>2</td><td>京东物流</td><td><span class="tag-success">✓ 成功</span></td><td>RW2603240002</td></tr>
+          <tr><td>3</td><td>圆通速递</td><td><span class="tag-fail">✗ 失败</span></td><td>缺少必填字段：货物名称</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer-inner">
+      <button class="btn-secondary-cyt" onclick="closeResult()">关闭</button>
+      <button class="btn-secondary-cyt"><i class="bi bi-download"></i> 导出结果</button>
+      <button class="btn-primary-cyt">重试失败的（1个）</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let rowCount = 3;
+
+function deleteRow(rowId) {
+  if (rowCount <= 1) { alert('至少保留1条运单'); return; }
+  if (confirm('确认删除该运单？')) {
+    document.getElementById(rowId).remove();
+    rowCount--;
+    updateCount();
+  }
+}
+
+function updateCount() {
+  document.getElementById('totalCount').textContent = rowCount;
+  document.getElementById('btnCount').textContent = rowCount;
+  document.getElementById('waybillCount').textContent = `（${rowCount} 个运单）`;
+}
+
+function clearMap(el) {
+  const sel = el.parentElement.querySelector('select');
+  sel.value = '';
+  sel.classList.add('unmapped');
+}
+
+function checkMappingConflict(sel, fieldName, oldVal) {
+  if (sel.value && sel.value !== oldVal) {
+    document.getElementById('conflictModal').classList.add('show');
+  }
+  if (sel.value === '') {
+    sel.classList.add('unmapped');
+  } else {
+    sel.classList.remove('unmapped');
+  }
+}
+
+function closeConflict() {
+  document.getElementById('conflictModal').classList.remove('show');
+}
+
+function showResult() {
+  document.getElementById('resultModal').classList.add('show');
+}
+
+function closeResult() {
+  document.getElementById('resultModal').classList.remove('show');
+}
+
+function exportExcel() {
+  alert('导出功能（原型示意）');
+}
+</script>
+</body>
+</html>

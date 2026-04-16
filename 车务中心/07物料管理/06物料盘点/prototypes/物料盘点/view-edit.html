@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body>
+<iframe id="f" src="index.html" style="width:1440px;height:1000px;border:none"></iframe>
+<script>
+document.getElementById('f').onload=function(){
+  var d=this.contentDocument;
+  // click edit view
+  var btns=d.querySelectorAll('.btn-p');
+  for(var i=0;i<btns.length;i++){if(btns[i].textContent.indexOf('新增盘点')>-1){btns[i].click();break;}}
+};
+</script>
+</body></html>

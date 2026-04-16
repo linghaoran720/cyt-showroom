@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通用智能识别平台 - 财运通</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+:root {
+  --cyt-navy: #2B2B6E;
+  --cyt-primary: #165DFF;
+  --cyt-primary-hover: #0E47D4;
+  --cyt-bg: #F2F3F5;
+  --cyt-sidebar-w: 160px;
+  --cyt-topbar-h: 52px;
+  --cyt-success: #00B42A;
+  --cyt-warning: #FF7D00;
+  --cyt-danger: #F53F3F;
+  --cyt-text: #1D2129;
+  --cyt-text-secondary: #86909C;
+  --cyt-border: #E5E6EB;
+  --cyt-card-bg: #FFFFFF;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--cyt-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  color: var(--cyt-text);
+  margin: 0;
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: var(--cyt-topbar-h);
+  background: var(--cyt-navy);
+  display: flex; align-items: center; padding: 0 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.topbar-logo { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 16px; font-weight: 600; }
+.topbar-logo .badge-tag { background: rgba(255,255,255,0.18); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 400; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.topbar-right .icon-btn { color: rgba(255,255,255,0.75); font-size: 18px; cursor: pointer; transition: color .2s; }
+.topbar-right .icon-btn:hover { color: #fff; }
+.topbar-right .avatar { width: 30px; height: 30px; border-radius: 50%; background: #4A5EAC; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed; left: 0; top: var(--cyt-topbar-h); bottom: 0; z-index: 900;
+  width: var(--cyt-sidebar-w);
+  background: #fff;
+  border-right: 1px solid var(--cyt-border);
+  display: flex; flex-direction: column;
+  padding: 12px 0;
+  overflow-y: auto;
+}
+.sidebar-section { padding: 6px 12px 2px; font-size: 11px; color: var(--cyt-text-secondary); font-weight: 500; letter-spacing: .5px; }
+.nav-item-s {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px; cursor: pointer;
+  color: var(--cyt-text); font-size: 13px;
+  transition: all .15s; border-left: 3px solid transparent;
+  text-decoration: none;
+}
+.nav-item-s:hover { background: var(--cyt-bg); color: var(--cyt-primary); }
+.nav-item-s.active { background: #EEF3FF; color: var(--cyt-primary); font-weight: 600; border-left-color: var(--cyt-primary); }
+.nav-item-s i { font-size: 16px; width: 18px; text-align: center; }
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  margin-left: var(--cyt-sidebar-w);
+  margin-top: var(--cyt-topbar-h);
+  min-height: calc(100vh - var(--cyt-topbar-h));
+  padding: 24px;
+}
+
+/* ===== CARDS ===== */
+.card-cyt {
+  background: var(--cyt-card-bg);
+  border: 1px solid var(--cyt-border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+/* ===== PAGE HEADERS ===== */
+.page-header { margin-bottom: 20px; }
+.page-header h5 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+.page-header p { font-size: 13px; color: var(--cyt-text-secondary); margin: 0; }
+
+/* ===== UPLOAD ZONE ===== */
+.upload-zone {
+  border: 2px dashed var(--cyt-border);
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--cyt-bg);
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--cyt-primary);
+  background: #EEF3FF;
+}
+.upload-zone .upload-icon { font-size: 40px; color: var(--cyt-text-secondary); margin-bottom: 12px; }
+.upload-zone p { margin: 4px 0; color: var(--cyt-text-secondary); font-size: 13px; }
+.upload-zone .hint { font-size: 12px; color: #C2C7D0; }
+
+/* ===== FORM STYLES ===== */
+.form-label { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.form-control, .form-select {
+  font-size: 13px;
+  border-color: var(--cyt-border);
+  border-radius: 6px;
+  padding: 7px 12px;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--cyt-primary);
+  box-shadow: 0 0 0 2px rgba(22,93,255,.12);
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary-cyt {
+  background: var(--cyt-primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-primary-cyt:hover { background: var(--cyt-primary-hover); }
+.btn-secondary-cyt {
+  background: #fff;
+  color: var(--cyt-text);
+  border: 1px solid var(--cyt-border);
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-secondary-cyt:hover { border-color: var(--cyt-primary); color: var(--cyt-primary); }
+
+/* ===== SPLIT VIEW (Single Result) ===== */
+.split-view { display: flex; gap: 16px; height: calc(100vh - var(--cyt-topbar-h) - 120px); min-height: 520px; }
+.split-left { flex: 0 0 45%; display: flex; flex-direction: column; }
+.split-right { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.split-panel { background: var(--cyt-card-bg); border: 1px solid var(--cyt-border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
+.split-panel-title { font-size: 13px; font-weight: 600; color: var(--cyt-text-secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.image-viewer { flex: 1; background: #F0F0F0; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.image-viewer img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.field-list { flex: 1; overflow-y: auto; }
+.field-row {
+  display: flex; align-items: center; padding: 8px 0;
+  border-bottom: 1px solid var(--cyt-bg);
+}
+.field-row:last-child { border-bottom: none; }
+.field-label { width: 90px; font-size: 12px; color: var(--cyt-text-secondary); flex-shrink: 0; }
+.field-value { flex: 1; }
+.field-value input {
+  width: 100%; border: 1px solid transparent; border-radius: 4px;
+  padding: 4px 8px; font-size: 13px; background: transparent;
+  transition: all .15s;
+}
+.field-value input:hover { background: var(--cyt-bg); border-color: var(--cyt-border); }
+.field-value input:focus { background: #fff; border-color: var(--cyt-primary); outline: none; box-shadow: 0 0 0 2px rgba(22,93,255,.1); }
+.field-status { width: 20px; margin-left: 6px; }
+.confidence-badge { font-size: 11px; padding: 1px 6px; border-radius: 10px; }
+.conf-high { background: #E8F9E9; color: var(--cyt-success); }
+.conf-med { background: #FFF3E8; color: var(--cyt-warning); }
+.conf-low { background: #FEE; color: var(--cyt-danger); }
+
+/* ===== BATCH TABLE ===== */
+.batch-table-wrap { overflow: auto; max-height: calc(100vh - var(--cyt-topbar-h) - 200px); }
+.batch-table { border-collapse: collapse; min-width: 900px; }
+.batch-table th, .batch-table td {
+  border: 1px solid var(--cyt-border);
+  padding: 8px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.batch-table thead th { background: #F7F8FA; font-weight: 600; text-align: center; }
+.batch-table thead tr:first-child th { background: var(--cyt-navy); color: #fff; }
+.batch-table tbody tr:hover { background: #F8F9FF; }
+.batch-table td input {
+  border: none; background: transparent; width: 100%; font-size: 12px; outline: none;
+}
+.batch-table td input:focus { background: #EEF3FF; border-radius: 3px; }
+.status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; }
+.dot-success { background: var(--cyt-success); }
+.dot-warning { background: var(--cyt-warning); }
+.dot-danger { background: var(--cyt-danger); }
+.col-selector { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+
+/* ===== MAPPING TABLE ===== */
+.mapping-table { width: 100%; border-collapse: collapse; }
+.mapping-table th, .mapping-table td { padding: 10px 14px; border-bottom: 1px solid var(--cyt-border); font-size: 13px; }
+.mapping-table th { background: #F7F8FA; font-weight: 600; color: var(--cyt-text-secondary); font-size: 12px; }
+.mapping-table tbody tr:hover { background: #F8F9FF; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.tag-blue { background: #EEF3FF; color: var(--cyt-primary); }
+.tag-green { background: #E8F9E9; color: var(--cyt-success); }
+.tag-orange { background: #FFF3E8; color: var(--cyt-warning); }
+.tag-gray { background: #F2F3F5; color: #86909C; }
+
+/* ===== TOAST ===== */
+#toast-container { position: fixed; top: 68px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.cyt-toast {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border-radius: 8px; padding: 12px 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  border-left: 3px solid var(--cyt-success);
+  font-size: 13px; min-width: 240px;
+  animation: slideIn .25s ease-out;
+}
+.cyt-toast.warn { border-left-color: var(--cyt-warning); }
+.cyt-toast.err { border-left-color: var(--cyt-danger); }
+@keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateX(40px); } }
+
+/* ===== MODAL ===== */
+.modal-cyt { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; }
+.modal-cyt.show { display: flex; }
+.modal-box { background: #fff; border-radius: 10px; padding: 24px; max-width: 480px; width: 90%; }
+.modal-box h6 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
+.modal-box p { font-size: 13px; color: var(--cyt-text-secondary); margin: 0 0 20px; }
+
+/* ===== STAT CARDS ===== */
+.stat-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.stat-card { flex: 1; min-width: 120px; background: #fff; border: 1px solid var(--cyt-border); border-radius: 8px; padding: 14px 16px; }
+.stat-card .num { font-size: 24px; font-weight: 700; color: var(--cyt-primary); }
+.stat-card .lbl { font-size: 12px; color: var(--cyt-text-secondary); margin-top: 2px; }
+
+/* ===== MISC ===== */
+.section-divider { border: none; border-top: 1px solid var(--cyt-border); margin: 20px 0; }
+.action-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.search-box { position: relative; }
+.search-box input { padding-left: 32px; }
+.search-box i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--cyt-text-secondary); font-size: 15px; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--cyt-text-secondary); }
+.empty-state i { font-size: 48px; display: block; margin-bottom: 12px; color: var(--cyt-border); }
+.preview-img-thumb { width: 80px; height: 56px; object-fit: cover; border-radius: 4px; border: 1px solid var(--cyt-border); cursor: pointer; }
+.file-chip { display: inline-flex; align-items: center; gap: 6px; background: #EEF3FF; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: var(--cyt-primary); }
+.file-chip i { cursor: pointer; color: var(--cyt-text-secondary); }
+.file-chip i:hover { color: var(--cyt-danger); }
+.progress-mini { height: 4px; border-radius: 2px; background: var(--cyt-bg); overflow: hidden; margin-top: 6px; }
+.progress-mini-bar { height: 100%; background: var(--cyt-primary); border-radius: 2px; transition: width .3s; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <i class="bi bi-cpu" style="font-size:20px;color:#7A9EFF;"></i>
+    <span>通用智能识别平台</span>
+    <span class="badge-tag">Beta</span>
+  </div>
+  <div class="topbar-right">
+    <i class="bi bi-bell topbar-right icon-btn"></i>
+    <i class="bi bi-question-circle topbar-right icon-btn"></i>
+    <div class="topbar-right avatar">李</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-section">识别</div>
+  <a class="nav-item-s active" onclick="showView('create')" id="nav-create">
+    <i class="bi bi-file-earmark-plus"></i>新建识别
+  </a>
+  <a class="nav-item-s" onclick="showView('history')" id="nav-history">
+    <i class="bi bi-clock-history"></i>识别记录
+  </a>
+  <div class="sidebar-section mt-2">管理</div>
+  <a class="nav-item-s" onclick="showView('mapping')" id="nav-mapping">
+    <i class="bi bi-diagram-3"></i>映射规则
+  </a>
+  <a class="nav-item-s" onclick="showView('stats')" id="nav-stats">
+    <i class="bi bi-bar-chart"></i>数据统计
+  </a>
+  <div class="sidebar-section mt-2">系统</div>
+  <a class="nav-item-s" onclick="showView('settings')" id="nav-settings">
+    <i class="bi bi-gear"></i>系统设置
+  </a>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- ===================== VIEW: CREATE ===================== -->
+  <div id="view-create">
+    <div class="page-header">
+      <h5><i class="bi bi-cpu text-primary me-2"></i>新建识别任务</h5>
+      <p>上传单据图片或手动输入，系统将自动识别并填充运单字段</p>
+    </div>
+
+    <!-- Upload Mode Toggle -->
+    <div class="card-cyt mb-4">
+      <div class="d-flex gap-3 mb-4">
+        <button class="btn-primary-cyt" id="btn-mode-upload" onclick="setCreateMode('upload')">
+          <i class="bi bi-cloud-upload me-1"></i>图片识别
+        </button>
+        <button class="btn-secondary-cyt" id="btn-mode-manual" onclick="setCreateMode('manual')">
+          <i class="bi bi-keyboard me-1"></i>手动录入
+        </button>
+        <button class="btn-secondary-cyt ms-auto" id="btn-mode-batch" onclick="setCreateMode('batch')">
+          <i class="bi bi-layers me-1"></i>批量上传
+        </button>
+      </div>
+
+      <!-- Upload Mode -->
+      <div id="create-upload">
+        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event)">
+          <div class="upload-icon"><i class="bi bi-file-earmark-image"></i></div>
+          <p><strong>点击或拖拽文件到此区域上传</strong></p>
+          <p>支持 JPG、PNG、PDF 格式，单文件不超过 10MB</p>
+          <p class="hint">系统将自动识别: 客户名称、发货地、收货地、货物信息、司机信息等</p>
+        </div>
+        <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(event)">
+        <div id="file-preview" class="mt-3" style="display:none">
+          <div class="d-flex align-items-center gap-10">
+            <div id="thumb-container"></div>
+            <div id="upload-progress" style="flex:1; margin-left:12px;">
+              <div class="d-flex justify-content-between mb-1">
+                <span id="upload-filename" style="font-size:13px;color:var(--cyt-text-secondary);"></span>
+                <span id="upload-pct" style="font-size:12px;color:var(--cyt-primary);">0%</span>
+              </div>
+              <div class="progress-mini"><div class="progress-mini-bar" id="progress-bar" style="width:0%"></div></div>
+              <div id="upload-status" style="font-size:12px;color:var(--cyt-text-secondary);margin-top:4px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 d-flex gap-2 justify-content-end">
+          <button class="btn-secondary-cyt" onclick="resetCreate()">重置</button>
+          <button class="btn-primary-cyt" id="btn-recognize" onclick="startRecognize()" disabled>
+            <i class="bi bi-magic me-1"></i>开始识别
+          </button>
+        </div>
+      </div>
+
+      <!-- Manual Mode -->
+      <div id="create-manual" style="display:none">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">客户名称 <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="m-customer" placeholder="请输入客户名称">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">发货地</label>
+            <input type="text" class="form-control" id="m-origin" placeholder="城市/区县">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">收货地</label>
+            <input type="text" class="form-control" id="m-dest" placeholder="城市/区县">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">货物名称</label>
+            <input type="text" class="form-control" id="m-goods" placeholder="如：钢材、纸箱">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">重量(吨)</label>
+            <input type="number" class="form-control" id="m-weight" placeholder="0.00">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">司机姓名</label>
+            <input type="text" class="form-control" id="m-driver" placeholder="司机姓名">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">车牌号</label>
+            <input type="text" class="form-control" id="m-plate" placeholder="如：京A12345">
+          </div>
+          <div class="col-12">
+            <label class="form-label">备注</label>
+            <textarea class="form-control" id="m-remark" rows="2" placeholder="其他备注信息"></textarea>
+          </div>
+        </div>
+        <div class="mt-3 d-flex gap-2 justify-content-end">
+          <button class="btn-secondary-cyt" onclick="clearManual()">清空</button>
+          <button class="btn-primary-cyt" onclick="submitManual()">
+            <i class="bi bi-check2 me-1"></i>保存运单
+          </button>
+        </div>
+      </div>
+
+      <!-- Batch Mode -->
+      <div id="create-batch" style="display:none">
+        <div class="upload-zone" id="drop-zone-batch" onclick="document.getElementById('file-input-batch').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleBatchDrop(event)">
+          <div class="upload-icon"><i class="bi bi-files"></i></div>
+          <p><strong>批量上传运单图片</strong></p>
+          <p>支持同时上传多张图片，最多 20 张</p>
+          <p class="hint">系统将并行识别所有图片并生成汇总结果表</p>
+        </div>
+        <input type="file" id="file-input-batch" accept="image/*,.pdf" multiple style="display:none" onchange="handleBatchSelect(event)">
+        <div id="batch-file-list" class="mt-3" style="display:none"></div>
+        <div class="mt-3 d-flex gap-2 justify-content-end">
+          <button class="btn-secondary-cyt" onclick="resetBatch()">清空</button>
+          <button class="btn-primary-cyt" id="btn-batch-recognize" onclick="startBatchRecognize()" disabled>
+            <i class="bi bi-magic me-1"></i>批量识别
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: SINGLE RESULT ===================== -->
+  <div id="view-single-result" style="display:none">
+    <div class="page-header d-flex align-items-center">
+      <div>
+        <h5><i class="bi bi-check2-circle text-success me-2"></i>识别结果</h5>
+        <p>请核对识别结果并修正错误字段，确认后保存运单</p>
+      </div>
+      <div class="ms-auto d-flex gap-2">
+        <button class="btn-secondary-cyt" onclick="showView('create')"><i class="bi bi-arrow-left me-1"></i>返回</button>
+        <button class="btn-primary-cyt" onclick="saveWaybill()"><i class="bi bi-floppy me-1"></i>保存运单</button>
+      </div>
+    </div>
+    <div class="split-view">
+      <div class="split-left">
+        <div class="split-panel" style="flex:1">
+          <div class="split-panel-title"><i class="bi bi-image"></i>原始图片</div>
+          <div class="image-viewer" id="img-viewer">
+            <div style="text-align:center;color:var(--cyt-text-secondary);">
+              <i class="bi bi-file-earmark-image" style="font-size:48px;display:block;margin-bottom:8px;"></i>
+              <div style="font-size:12px;">图片预览区域</div>
+            </div>
+          </div>
+          <div class="mt-2 d-flex align-items-center gap-2" style="flex-shrink:0">
+            <span class="tag tag-green"><i class="bi bi-check-circle me-1"></i>识别完成</span>
+            <span style="font-size:12px;color:var(--cyt-text-secondary);" id="rec-filename">waybill_001.jpg</span>
+            <span class="ms-auto" style="font-size:12px;color:var(--cyt-text-secondary);">置信度 <strong id="rec-confidence">92%</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="split-right">
+        <div class="split-panel" style="flex:1">
+          <div class="split-panel-title"><i class="bi bi-table"></i>识别字段 <span class="ms-auto tag tag-blue" id="field-count-tag">12 个字段</span></div>
+          <div class="field-list" id="field-list">
+            <!-- Fields rendered by JS -->
+          </div>
+        </div>
+        <div class="split-panel mt-3" style="flex-shrink:0">
+          <div class="split-panel-title"><i class="bi bi-info-circle"></i>映射信息</div>
+          <div id="mapping-info" style="font-size:12px;color:var(--cyt-text-secondary);">
+            本次识别将参考 <strong style="color:var(--cyt-primary);" id="mapping-rule-count">7</strong> 条映射规则
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: BATCH RESULT ===================== -->
+  <div id="view-batch-result" style="display:none">
+    <div class="page-header d-flex align-items-center flex-wrap gap-2">
+      <div>
+        <h5><i class="bi bi-table text-primary me-2"></i>批量识别结果</h5>
+        <p>共识别 <strong id="batch-total">0</strong> 条运单，请确认后批量保存</p>
+      </div>
+      <div class="ms-auto d-flex gap-2">
+        <button class="btn-secondary-cyt" onclick="showView('create')"><i class="bi bi-arrow-left me-1"></i>返回</button>
+        <button class="btn-secondary-cyt" onclick="exportBatch()"><i class="bi bi-download me-1"></i>导出 Excel</button>
+        <button class="btn-primary-cyt" onclick="saveBatchAll()"><i class="bi bi-floppy me-1"></i>全部保存</button>
+      </div>
+    </div>
+
+    <div class="card-cyt mb-3">
+      <div class="stat-row">
+        <div class="stat-card"><div class="num" id="batch-stat-success">0</div><div class="lbl">识别成功</div></div>
+        <div class="stat-card"><div class="num" style="color:var(--cyt-warning)" id="batch-stat-warn">0</div><div class="lbl">需人工核对</div></div>
+        <div class="stat-card"><div class="num" style="color:var(--cyt-danger)" id="batch-stat-fail">0</div><div class="lbl">识别失败</div></div>
+        <div class="stat-card"><div class="num" id="batch-stat-rate">0%</div><div class="lbl">总体准确率</div></div>
+      </div>
+
+      <div class="action-bar">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="text" class="form-control" placeholder="搜索客户名称..." style="width:200px;" oninput="filterBatchTable(this.value)">
+        </div>
+        <select class="form-select" style="width:140px;" onchange="filterBatchStatus(this.value)">
+          <option value="">全部状态</option>
+          <option value="success">识别成功</option>
+          <option value="warn">需核对</option>
+          <option value="fail">识别失败</option>
+        </select>
+        <button class="btn-secondary-cyt ms-auto" onclick="selectAllBatch()">全选</button>
+      </div>
+
+      <div class="batch-table-wrap">
+        <table class="batch-table" id="batch-table">
+          <thead>
+            <tr>
+              <th rowspan="2" style="width:36px"><input type="checkbox" id="chk-all" onchange="toggleAllBatch(this.checked)"></th>
+              <th rowspan="2" style="width:40px">#</th>
+              <th rowspan="2">状态</th>
+              <th rowspan="2">原文件</th>
+              <th colspan="7" style="background:#1A3A6E;color:#fff;">系统运单字段</th>
+              <th rowspan="2">操作</th>
+            </tr>
+            <tr>
+              <th>客户名称</th>
+              <th>发货地</th>
+              <th>收货地</th>
+              <th>货物名称</th>
+              <th>重量(吨)</th>
+              <th>司机</th>
+              <th>车牌号</th>
+            </tr>
+          </thead>
+          <tbody id="batch-tbody">
+            <!-- Rows rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: HISTORY ===================== -->
+  <div id="view-history" style="display:none">
+    <div class="page-header">
+      <h5><i class="bi bi-clock-history text-primary me-2"></i>识别记录</h5>
+      <p>查看历史识别和保存的运单记录</p>
+    </div>
+    <div class="card-cyt">
+      <div class="action-bar">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="text" class="form-control" placeholder="搜索客户名称..." style="width:200px;" oninput="filterHistory(this.value)">
+        </div>
+        <span class="ms-auto" style="font-size:13px;color:var(--cyt-text-secondary);">共 <span id="history-count">0</span> 条记录</span>
+      </div>
+      <div id="history-table-wrap">
+        <table class="mapping-table" id="history-table">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>客户名称</th>
+              <th>发货地</th>
+              <th>收货地</th>
+              <th>货物</th>
+              <th>重量</th>
+              <th>司机</th>
+              <th>车牌</th>
+              <th>创建时间</th>
+              <th style="width:80px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+        <div id="history-empty" class="empty-state" style="display:none">
+          <i class="bi bi-inbox"></i>
+          <p>暂无运单记录<br><span style="font-size:12px;">创建识别任务后，保存的运单将在此显示</span></p>
+          <button class="btn-primary-cyt mt-2" onclick="showView('create')">去创建识别任务</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: MAPPING ===================== -->
+  <div id="view-mapping" style="display:none">
+    <div class="page-header">
+      <h5><i class="bi bi-diagram-3 text-primary me-2"></i>映射规则管理</h5>
+      <p>管理来源字段到系统字段的映射关系，提升识别准确率</p>
+    </div>
+    <div class="card-cyt">
+      <div class="action-bar">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="text" class="form-control" placeholder="搜索来源字段..." style="width:220px;" oninput="filterMapping(this.value)">
+        </div>
+        <select class="form-select" style="width:160px;" onchange="filterMappingTarget(this.value)" id="mapping-target-filter">
+          <option value="">全部目标字段</option>
+          <option value="customer_name">客户名称</option>
+          <option value="origin">发货地</option>
+          <option value="dest">收货地</option>
+          <option value="goods_name">货物名称</option>
+          <option value="weight">重量</option>
+          <option value="driver_name">司机姓名</option>
+          <option value="plate_no">车牌号</option>
+        </select>
+        <button class="btn-primary-cyt ms-auto" onclick="openAddMappingModal()">
+          <i class="bi bi-plus-lg me-1"></i>新增规则
+        </button>
+      </div>
+
+      <table class="mapping-table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>来源字段</th>
+            <th>目标字段</th>
+            <th>目标字段名</th>
+            <th>使用次数</th>
+            <th>最后使用</th>
+            <th>创建人</th>
+            <th>状态</th>
+            <th style="width:120px">操作</th>
+          </tr>
+        </thead>
+        <tbody id="mapping-tbody"></tbody>
+      </table>
+      <div id="mapping-empty" class="empty-state" style="display:none">
+        <i class="bi bi-diagram-3"></i>
+        <p>暂无映射规则</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: STATS ===================== -->
+  <div id="view-stats" style="display:none">
+    <div class="page-header">
+      <h5><i class="bi bi-bar-chart text-primary me-2"></i>数据统计</h5>
+      <p>识别平台整体使用情况与效果分析</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="num">1,247</div><div class="lbl">本月识别量</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--cyt-success)">94.2%</div><div class="lbl">识别准确率</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--cyt-warning)">1.8s</div><div class="lbl">平均识别时长</div></div>
+      <div class="stat-card"><div class="num" id="stats-saved">0</div><div class="lbl">已保存运单</div></div>
+    </div>
+    <div class="card-cyt">
+      <div class="split-panel-title mb-3"><i class="bi bi-graph-up me-2"></i>字段识别准确率分布</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div v-for="f in statsFields">
+          <div class="d-flex justify-content-between mb-1" style="font-size:13px;">
+            <span id="sf-customer">客户名称</span><span style="color:var(--cyt-primary)">96%</span>
+          </div>
+          <div class="progress-mini"><div class="progress-mini-bar" style="width:96%;background:var(--cyt-success);height:8px;border-radius:4px;"></div></div>
+        </div>
+        <div><div class="d-flex justify-content-between mb-1" style="font-size:13px;"><span>发货地</span><span style="color:var(--cyt-primary)">93%</span></div><div class="progress-mini"><div class="progress-mini-bar" style="width:93%;background:var(--cyt-success);height:8px;border-radius:4px;"></div></div></div>
+        <div><div class="d-flex justify-content-between mb-1" style="font-size:13px;"><span>收货地</span><span style="color:var(--cyt-primary)">91%</span></div><div class="progress-mini"><div class="progress-mini-bar" style="width:91%;background:var(--cyt-success);height:8px;border-radius:4px;"></div></div></div>
+        <div><div class="d-flex justify-content-between mb-1" style="font-size:13px;"><span>货物名称</span><span style="color:var(--cyt-warning)">88%</span></div><div class="progress-mini"><div class="progress-mini-bar" style="width:88%;background:var(--cyt-warning);height:8px;border-radius:4px;"></div></div></div>
+        <div><div class="d-flex justify-content-between mb-1" style="font-size:13px;"><span>重量</span><span style="color:var(--cyt-warning)">85%</span></div><div class="progress-mini"><div class="progress-mini-bar" style="width:85%;background:var(--cyt-warning);height:8px;border-radius:4px;"></div></div></div>
+        <div><div class="d-flex justify-content-between mb-1" style="font-size:13px;"><span>司机姓名</span><span style="color:var(--cyt-success)">97%</span></div><div class="progress-mini"><div class="progress-mini-bar" style="width:97%;background:var(--cyt-success);height:8px;border-radius:4px;"></div></div></div>
+        <div><div class="d-flex justify-content-between mb-1" style="font-size:13px;"><span>车牌号</span><span style="color:var(--cyt-success)">99%</span></div><div class="progress-mini"><div class="progress-mini-bar" style="width:99%;background:var(--cyt-success);height:8px;border-radius:4px;"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: SETTINGS ===================== -->
+  <div id="view-settings" style="display:none">
+    <div class="page-header">
+      <h5><i class="bi bi-gear text-primary me-2"></i>系统设置</h5>
+      <p>配置识别引擎参数和系统偏好</p>
+    </div>
+    <div class="card-cyt">
+      <h6 class="fw-semibold mb-3">识别引擎配置</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">默认识别模式</label>
+          <select class="form-select">
+            <option>标准模式（平衡精度与速度）</option>
+            <option>精准模式（更高精度）</option>
+            <option>快速模式（更快速度）</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">置信度阈值</label>
+          <input type="number" class="form-control" value="80" min="0" max="100"> 
+          <div style="font-size:12px;color:var(--cyt-text-secondary);margin-top:4px;">低于此值的字段将标记为需人工核对</div>
+        </div>
+        <div class="col-12">
+          <hr class="section-divider">
+          <h6 class="fw-semibold mb-3">数据管理</h6>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">本地存储数据</label>
+          <div style="font-size:13px;color:var(--cyt-text-secondary);">运单记录 <strong id="setting-waybill-count">0</strong> 条，映射规则 <strong id="setting-rule-count">0</strong> 条</div>
+        </div>
+        <div class="col-12">
+          <button class="btn-secondary-cyt" onclick="clearAllData()">
+            <i class="bi bi-trash me-1"></i>清空所有本地数据
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main-content -->
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- CONFLICT MODAL -->
+<div class="modal-cyt" id="conflict-modal">
+  <div class="modal-box">
+    <h6><i class="bi bi-exclamation-triangle text-warning me-2"></i>发现映射冲突</h6>
+    <p id="conflict-msg">来源字段"寄件方"已有映射规则指向"发货方名称"，本次识别将使用新规则"客户名称"。</p>
+    <div class="d-flex gap-2 justify-content-end">
+      <button class="btn-secondary-cyt" onclick="resolveConflict('once')">仅本次生效</button>
+      <button class="btn-primary-cyt" onclick="resolveConflict('update')">更新映射规则</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MAPPING MODAL -->
+<div class="modal-cyt" id="add-mapping-modal">
+  <div class="modal-box">
+    <h6><i class="bi bi-plus-circle text-primary me-2"></i>新增映射规则</h6>
+    <p>配置来源字段到系统字段的映射关系</p>
+    <div class="row g-3 mb-3">
+      <div class="col-12">
+        <label class="form-label">来源字段名称 <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="new-source-field" placeholder="如：寄件方、货主单位、甲方">
+      </div>
+      <div class="col-12">
+        <label class="form-label">映射到系统字段 <span class="text-danger">*</span></label>
+        <select class="form-select" id="new-target-field">
+          <option value="">请选择目标字段</option>
+          <option value="customer_name">客户名称</option>
+          <option value="origin">发货地</option>
+          <option value="dest">收货地</option>
+          <option value="goods_name">货物名称</option>
+          <option value="weight">重量</option>
+          <option value="driver_name">司机姓名</option>
+          <option value="plate_no">车牌号</option>
+          <option value="remark">备注</option>
+        </select>
+      </div>
+    </div>
+    <div class="d-flex gap-2 justify-content-end">
+      <button class="btn-secondary-cyt" onclick="closeModal('add-mapping-modal')">取消</button>
+      <button class="btn-primary-cyt" onclick="saveNewMapping()">保存规则</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-cyt" id="delete-mapping-modal">
+  <div class="modal-box">
+    <h6><i class="bi bi-trash text-danger me-2"></i>删除映射规则</h6>
+    <p id="delete-mapping-msg">确认删除该映射规则吗？删除后，相关字段识别将不再自动映射。</p>
+    <div class="d-flex gap-2 justify-content-end">
+      <button class="btn-secondary-cyt" onclick="closeModal('delete-mapping-modal')">取消</button>
+      <button class="btn-primary-cyt" style="background:var(--cyt-danger);" onclick="confirmDeleteMapping()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- BATCH SAVE SUCCESS MODAL -->
+<div class="modal-cyt" id="batch-save-modal">
+  <div class="modal-box" style="text-align:center;">
+    <div style="font-size:56px;margin-bottom:12px;">🎉</div>
+    <h6 style="font-size:16px;">批量保存成功</h6>
+    <p id="batch-save-msg">已成功保存 0 条运单记录</p>
+    <div class="d-flex gap-2 justify-content-center">
+      <button class="btn-secondary-cyt" onclick="closeModal('batch-save-modal');showView('create')">继续识别</button>
+      <button class="btn-primary-cyt" onclick="closeModal('batch-save-modal');showView('history')">查看记录</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// =============================================
+// DATA & STATE
+// =============================================
+const STORAGE_KEYS = { waybills: 'cyt_waybills', mappings: 'cyt_mapping_rules' };
+
+const TARGET_FIELD_LABELS = {
+  customer_name: '客户名称', origin: '发货地', dest: '收货地',
+  goods_name: '货物名称', weight: '重量', driver_name: '司机姓名',
+  plate_no: '车牌号', remark: '备注'
+};
+
+const DEFAULT_MAPPINGS = [
+  { id:'r1', sourceField:'客户名称', targetField:'customer_name', targetFieldName:'客户名称', usageCount:156, lastUsed:'2026-03-24', createdBy:'李调度', active:true },
+  { id:'r2', sourceField:'寄件方', targetField:'customer_name', targetFieldName:'客户名称', usageCount:42, lastUsed:'2026-03-23', createdBy:'王调度', active:true },
+  { id:'r3', sourceField:'货主单位', targetField:'customer_name', targetFieldName:'客户名称', usageCount:28, lastUsed:'2026-03-20', createdBy:'系统', active:true },
+  { id:'r4', sourceField:'发货城市', targetField:'origin', targetFieldName:'发货地', usageCount:89, lastUsed:'2026-03-24', createdBy:'李调度', active:true },
+  { id:'r5', sourceField:'目的地', targetField:'dest', targetFieldName:'收货地', usageCount:76, lastUsed:'2026-03-22', createdBy:'张经理', active:true },
+  { id:'r6', sourceField:'品名', targetField:'goods_name', targetFieldName:'货物名称', usageCount:103, lastUsed:'2026-03-24', createdBy:'系统', active:true },
+  { id:'r7', sourceField:'司机', targetField:'driver_name', targetFieldName:'司机姓名', usageCount:234, lastUsed:'2026-03-25', createdBy:'系统', active:true }
+];
+
+let state = {
+  currentView: 'create',
+  createMode: 'upload',
+  selectedFile: null,
+  recognizedFields: [],
+  batchFiles: [],
+  batchData: [],
+  pendingDeleteId: null,
+  currentWaybillId: null
+};
+
+function getWaybills() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.waybills) || '[]'); }
+function saveWaybills(data) { localStorage.setItem(STORAGE_KEYS.waybills, JSON.stringify(data)); }
+function getMappings() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.mappings) || 'null') || DEFAULT_MAPPINGS; }
+function saveMappings(data) { localStorage.setItem(STORAGE_KEYS.mappings, JSON.stringify(data)); }
+
+function initData() {
+  if (!localStorage.getItem(STORAGE_KEYS.mappings)) { saveMappings(DEFAULT_MAPPINGS); }
+}
+
+// =============================================
+// NAVIGATION
+// =============================================
+function showView(name) {
+  const views = ['create','single-result','batch-result','history','mapping','stats','settings'];
+  views.forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el) el.style.display = (v === name) ? '' : 'none';
+  });
+  const navMap = { 'create':'nav-create', 'history':'nav-history', 'mapping':'nav-mapping', 'stats':'nav-stats', 'settings':'nav-settings' };
+  document.querySelectorAll('.nav-item-s').forEach(el => el.classList.remove('active'));
+  const navId = navMap[name];
+  if (navId) { const navEl = document.getElementById(navId); if (navEl) navEl.classList.add('active'); }
+  state.currentView = name;
+  if (name === 'history') renderHistory();
+  if (name === 'mapping') renderMappingTable();
+  if (name === 'stats') updateStats();
+  if (name === 'settings') updateSettingCounts();
+}
+
+// =============================================
+// CREATE MODE
+// =============================================
+function setCreateMode(mode) {
+  state.createMode = mode;
+  document.getElementById('create-upload').style.display = mode === 'upload' ? '' : 'none';
+  document.getElementById('create-manual').style.display = mode === 'manual' ? '' : 'none';
+  document.getElementById('create-batch').style.display = mode === 'batch' ? '' : 'none';
+  const modes = ['upload','manual','batch'];
+  modes.forEach(m => {
+    document.getElementById('btn-mode-' + m).className = m === mode ? 'btn-primary-cyt' : 'btn-secondary-cyt';
+  });
+  if (mode === 'batch') document.getElementById('btn-mode-batch').className = 'btn-primary-cyt';
+}
+
+// =============================================
+// SINGLE FILE UPLOAD & RECOGNIZE
+// =============================================
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (file) processFile(file);
+}
+function handleDrop(event) {
+  event.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = event.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function processFile(file) {
+  if (file.size > 10 * 1024 * 1024) { showToast('文件大小超过 10MB 限制', 'warn'); return; }
+  state.selectedFile = file;
+  document.getElementById('file-preview').style.display = '';
+  document.getElementById('upload-filename').textContent = file.name;
+  const thumbEl = document.getElementById('thumb-container');
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      thumbEl.innerHTML = '<img src="' + e.target.result + '" class="preview-img-thumb" alt="预览">';
+      state.previewSrc = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    thumbEl.innerHTML = '<div style="width:80px;height:56px;border-radius:4px;border:1px solid var(--cyt-border);display:flex;align-items:center;justify-content:center;background:#f7f8fa;"><i class="bi bi-file-earmark-pdf" style="font-size:24px;color:#F53F3F;"></i></div>';
+    state.previewSrc = null;
+  }
+  document.getElementById('upload-status').textContent = '文件已选择，点击"开始识别"';
+  document.getElementById('btn-recognize').disabled = false;
+}
+function resetCreate() {
+  state.selectedFile = null;
+  document.getElementById('file-preview').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  document.getElementById('btn-recognize').disabled = true;
+  document.getElementById('progress-bar').style.width = '0%';
+  document.getElementById('upload-pct').textContent = '0%';
+  document.getElementById('upload-status').textContent = '';
+}
+function startRecognize() {
+  if (!state.selectedFile) return;
+  document.getElementById('btn-recognize').disabled = true;
+  document.getElementById('btn-recognize').innerHTML = '<i class="bi bi-hourglass-split me-1"></i>识别中...';
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct += Math.random() * 20 + 10;
+    if (pct >= 100) { pct = 100; clearInterval(interval); finishRecognize(); }
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('upload-pct').textContent = Math.round(pct) + '%';
+    document.getElementById('upload-status').textContent = pct < 60 ? '图像预处理中...' : pct < 85 ? '字段识别中...' : '映射规则匹配中...';
+  }, 250);
+}
+function finishRecognize() {
+  document.getElementById('upload-status').textContent = '识别完成';
+  showToast('识别成功！请核对识别结果', 'success');
+  state.recognizedFields = generateMockFields(state.selectedFile ? state.selectedFile.name : 'waybill.jpg');
+  setTimeout(() => showSingleResult(), 400);
+}
+
+function generateMockFields(filename) {
+  const samples = [
+    { label:'客户名称', key:'customer', value:'广州晨光纸业有限公司', conf:96, confLevel:'high' },
+    { label:'发货地', key:'origin', value:'广州市花都区', conf:93, confLevel:'high' },
+    { label:'收货地', key:'dest', value:'深圳市龙华区', conf:88, confLevel:'high' },
+    { label:'货物名称', key:'goods', value:'A4复印纸', conf:91, confLevel:'high' },
+    { label:'货物重量', key:'weight', value:'15.5', conf:78, confLevel:'med' },
+    { label:'货物数量', key:'qty', value:'300箱', conf:82, confLevel:'high' },
+    { label:'司机姓名', key:'driver', value:'张建国', conf:97, confLevel:'high' },
+    { label:'车牌号', key:'plate', value:'粤A·88765', conf:99, confLevel:'high' },
+    { label:'联系电话', key:'phone', value:'13812345678', conf:94, confLevel:'high' },
+    { label:'发货日期', key:'date', value:'2026-03-25', conf:86, confLevel:'high' },
+    { label:'运费金额', key:'fee', value:'¥3,200', conf:72, confLevel:'med' },
+    { label:'备注信息', key:'remark', value:'易碎品，小心轻放', conf:63, confLevel:'low' }
+  ];
+  return samples;
+}
+
+function showSingleResult() {
+  document.getElementById('rec-filename').textContent = state.selectedFile ? state.selectedFile.name : 'waybill.jpg';
+  const totalConf = Math.round(state.recognizedFields.reduce((s,f) => s+f.conf, 0) / state.recognizedFields.length);
+  document.getElementById('rec-confidence').textContent = totalConf + '%';
+  document.getElementById('field-count-tag').textContent = state.recognizedFields.length + ' 个字段';
+  document.getElementById('mapping-rule-count').textContent = getMappings().length;
+  if (state.previewSrc) {
+    document.getElementById('img-viewer').innerHTML = '<img src="' + state.previewSrc + '" style="max-width:100%;max-height:100%;object-fit:contain;">';
+  }
+  const list = document.getElementById('field-list');
+  list.innerHTML = state.recognizedFields.map(f => `
+    <div class="field-row">
+      <div class="field-label">${f.label}</div>
+      <div class="field-value"><input type="text" value="${f.value}" id="rf-${f.key}"></div>
+      <div class="field-status"><span class="confidence-badge conf-${f.confLevel}">${f.conf}%</span></div>
+    </div>
+  `).join('');
+  showView('single-result');
+  document.getElementById('btn-recognize').disabled = false;
+  document.getElementById('btn-recognize').innerHTML = '<i class="bi bi-magic me-1"></i>开始识别';
+}
+
+function saveWaybill() {
+  const fields = state.recognizedFields;
+  const getValue = key => {
+    const el = document.getElementById('rf-' + key);
+    return el ? el.value : (fields.find(f => f.key === key) || {}).value || '';
+  };
+  const waybill = {
+    id: 'W' + Date.now(),
+    createdAt: new Date().toLocaleString('zh-CN'),
+    customer: getValue('customer'),
+    origin: getValue('origin'),
+    dest: getValue('dest'),
+    goods: getValue('goods'),
+    weight: getValue('weight'),
+    driver: getValue('driver'),
+    plate: getValue('plate'),
+    remark: getValue('remark'),
+    source: 'ocr'
+  };
+  const list = getWaybills();
+  list.unshift(waybill);
+  saveWaybills(list);
+  showToast('运单已保存！', 'success');
+  setTimeout(() => showView('create'), 1200);
+}
+
+// =============================================
+// MANUAL SUBMIT
+// =============================================
+function clearManual() {
+  ['m-customer','m-origin','m-dest','m-goods','m-weight','m-driver','m-plate','m-remark'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+function submitManual() {
+  const customer = document.getElementById('m-customer').value.trim();
+  if (!customer) { showToast('请填写客户名称', 'warn'); document.getElementById('m-customer').focus(); return; }
+  const waybill = {
+    id: 'W' + Date.now(),
+    createdAt: new Date().toLocaleString('zh-CN'),
+    customer,
+    origin: document.getElementById('m-origin').value.trim(),
+    dest: document.getElementById('m-dest').value.trim(),
+    goods: document.getElementById('m-goods').value.trim(),
+    weight: document.getElementById('m-weight').value.trim(),
+    driver: document.getElementById('m-driver').value.trim(),
+    plate: document.getElementById('m-plate').value.trim(),
+    remark: document.getElementById('m-remark').value.trim(),
+    source: 'manual'
+  };
+  const list = getWaybills();
+  list.unshift(waybill);
+  saveWaybills(list);
+  showToast('运单已保存！', 'success');
+  clearManual();
+  setTimeout(() => showView('history'), 1200);
+}
+
+// =============================================
+// BATCH UPLOAD & RECOGNIZE
+// =============================================
+let batchFilesArr = [];
+function handleBatchSelect(event) { addBatchFiles(Array.from(event.target.files)); }
+function handleBatchDrop(event) {
+  event.preventDefault();
+  document.getElementById('drop-zone-batch').classList.remove('drag-over');
+  addBatchFiles(Array.from(event.dataTransfer.files));
+}
+function addBatchFiles(files) {
+  batchFilesArr = batchFilesArr.concat(files).slice(0, 20);
+  renderBatchFileList();
+  document.getElementById('btn-batch-recognize').disabled = batchFilesArr.length === 0;
+}
+function renderBatchFileList() {
+  const wrap = document.getElementById('batch-file-list');
+  if (batchFilesArr.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  wrap.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+    batchFilesArr.map((f, i) => `<div class="file-chip"><i class="bi bi-file-image"></i>${f.name}<i class="bi bi-x" onclick="removeBatchFile(${i})"></i></div>`).join('') +
+    '</div><div style="font-size:12px;color:var(--cyt-text-secondary);margin-top:6px;">共 ${batchFilesArr.length} 个文件</div>';
+  wrap.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+    batchFilesArr.map((f, i) => `<span class="file-chip"><i class="bi bi-file-image"></i>${f.name}<i class="bi bi-x" onclick="removeBatchFile(${i})"></i></span>`).join('') +
+    '</div><div style="font-size:12px;color:var(--cyt-text-secondary);margin-top:6px;">共 ' + batchFilesArr.length + ' 个文件</div>';
+}
+function removeBatchFile(idx) {
+  batchFilesArr.splice(idx, 1);
+  renderBatchFileList();
+  document.getElementById('btn-batch-recognize').disabled = batchFilesArr.length === 0;
+}
+function resetBatch() { batchFilesArr = []; renderBatchFileList(); document.getElementById('file-input-batch').value = ''; document.getElementById('btn-batch-recognize').disabled = true; }
+
+const SAMPLE_CUSTOMERS = ['上海联合物流有限公司','北京远方货运','广州晨光纸业','深圳顺达电子','成都天府快运','武汉中原物流'];
+const SAMPLE_ORIGINS = ['上海浦东区','北京顺义区','广州花都区','深圳宝安区','成都双流区','武汉武昌区'];
+const SAMPLE_DESTS = ['杭州余杭区','天津滨海区','深圳龙华区','广州番禺区','重庆渝北区','南京江宁区'];
+const SAMPLE_GOODS = ['钢材','电子元件','纸张','化工品','机械设备','服装','食品'];
+const SAMPLE_DRIVERS = ['张建国','李师傅','王明','刘东','陈强','赵磊'];
+const SAMPLE_PLATES = ['粤A·88765','沪B·23456','京C·45678','浙D·56789','苏E·67890','川F·78901'];
+
+function startBatchRecognize() {
+  if (batchFilesArr.length === 0) return;
+  const btn = document.getElementById('btn-batch-recognize');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>识别中...';
+  showToast('开始批量识别 ' + batchFilesArr.length + ' 个文件...', 'success');
+  setTimeout(() => {
+    const statuses = ['success', 'success', 'success', 'warn', 'success', 'warn', 'fail', 'success'];
+    state.batchData = batchFilesArr.map((f, i) => {
+      const st = statuses[i % statuses.length];
+      const r = idx => Math.floor(Math.random() * idx.length);
+      return {
+        idx: i+1, filename: f.name, status: st,
+        customer: st === 'fail' ? '' : SAMPLE_CUSTOMERS[r(SAMPLE_CUSTOMERS)],
+        origin: st === 'fail' ? '' : SAMPLE_ORIGINS[r(SAMPLE_ORIGINS)],
+        dest: st === 'fail' ? '' : SAMPLE_DESTS[r(SAMPLE_DESTS)],
+        goods: SAMPLE_GOODS[r(SAMPLE_GOODS)],
+        weight: (Math.random() * 20 + 1).toFixed(1),
+        driver: SAMPLE_DRIVERS[r(SAMPLE_DRIVERS)],
+        plate: SAMPLE_PLATES[r(SAMPLE_PLATES)]
+      };
+    });
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-magic me-1"></i>批量识别';
+    renderBatchResultView();
+  }, 2000);
+}
+
+function renderBatchResultView() {
+  const data = state.batchData;
+  document.getElementById('batch-total').textContent = data.length;
+  const success = data.filter(d => d.status === 'success').length;
+  const warn = data.filter(d => d.status === 'warn').length;
+  const fail = data.filter(d => d.status === 'fail').length;
+  document.getElementById('batch-stat-success').textContent = success;
+  document.getElementById('batch-stat-warn').textContent = warn;
+  document.getElementById('batch-stat-fail').textContent = fail;
+  document.getElementById('batch-stat-rate').textContent = Math.round((success+warn)/data.length*100) + '%';
+  renderBatchRows(data);
+  showView('batch-result');
+}
+
+function renderBatchRows(data) {
+  const tbody = document.getElementById('batch-tbody');
+  tbody.innerHTML = data.map((row, i) => {
+    const statusMap = { success: '<span class="status-dot dot-success"></span>成功', warn: '<span class="status-dot dot-warning"></span>需核对', fail: '<span class="status-dot dot-danger"></span>失败' };
+    return `<tr data-status="${row.status}" data-customer="${row.customer}">
+      <td><input type="checkbox" class="batch-row-chk"></td>
+      <td style="text-align:center;">${row.idx}</td>
+      <td>${statusMap[row.status]}</td>
+      <td style="color:var(--cyt-primary);font-size:12px;">${row.filename}</td>
+      <td><input type="text" value="${row.customer}" placeholder="-"></td>
+      <td><input type="text" value="${row.origin}" placeholder="-"></td>
+      <td><input type="text" value="${row.dest}" placeholder="-"></td>
+      <td><input type="text" value="${row.goods}" placeholder="-"></td>
+      <td><input type="text" value="${row.weight}" placeholder="-" style="width:70px;"></td>
+      <td><input type="text" value="${row.driver}" placeholder="-"></td>
+      <td><input type="text" value="${row.plate}" placeholder="-"></td>
+      <td>
+        <button class="btn-secondary-cyt" style="padding:3px 8px;font-size:11px;" onclick="removeBatchRow(this)">移除</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function removeBatchRow(btn) {
+  btn.closest('tr').remove();
+  const rows = document.querySelectorAll('#batch-tbody tr');
+  document.getElementById('batch-total').textContent = rows.length;
+}
+
+function filterBatchTable(keyword) {
+  const rows = document.querySelectorAll('#batch-tbody tr');
+  rows.forEach(tr => { tr.style.display = tr.dataset.customer.includes(keyword) ? '' : 'none'; });
+}
+function filterBatchStatus(status) {
+  const rows = document.querySelectorAll('#batch-tbody tr');
+  rows.forEach(tr => { tr.style.display = (!status || tr.dataset.status === status) ? '' : 'none'; });
+}
+function selectAllBatch() {
+  document.querySelectorAll('.batch-row-chk').forEach(c => c.checked = true);
+  document.getElementById('chk-all').checked = true;
+}
+function toggleAllBatch(checked) {
+  document.querySelectorAll('.batch-row-chk').forEach(c => c.checked = checked);
+}
+function exportBatch() { showToast('已导出 Excel 文件（演示）', 'success'); }
+
+function saveBatchAll() {
+  const rows = document.querySelectorAll('#batch-tbody tr');
+  const list = getWaybills();
+  let saved = 0;
+  rows.forEach(tr => {
+    const inputs = tr.querySelectorAll('input[type="text"]');
+    if (inputs[0].value.trim()) {
+      list.unshift({
+        id: 'W' + Date.now() + saved,
+        createdAt: new Date().toLocaleString('zh-CN'),
+        customer: inputs[0].value, origin: inputs[1].value, dest: inputs[2].value,
+        goods: inputs[3].value, weight: inputs[4].value, driver: inputs[5].value,
+        plate: inputs[6].value, remark: '', source: 'batch'
+      });
+      saved++;
+    }
+  });
+  saveWaybills(list);
+  document.getElementById('batch-save-msg').textContent = '已成功保存 ' + saved + ' 条运单记录';
+  openModal('batch-save-modal');
+}
+
+// =============================================
+// HISTORY VIEW
+// =============================================
+function renderHistory(keyword) {
+  let list = getWaybills();
+  if (keyword) list = list.filter(w => w.customer.includes(keyword));
+  document.getElementById('history-count').textContent = list.length;
+  const tbody = document.getElementById('history-tbody');
+  const empty = document.getElementById('history-empty');
+  if (list.length === 0) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map((w, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${w.customer || '-'}</strong></td>
+      <td>${w.origin || '-'}</td>
+      <td>${w.dest || '-'}</td>
+      <td>${w.goods || '-'}</td>
+      <td>${w.weight ? w.weight + '吨' : '-'}</td>
+      <td>${w.driver || '-'}</td>
+      <td>${w.plate || '-'}</td>
+      <td style="font-size:12px;color:var(--cyt-text-secondary);">${w.createdAt}</td>
+      <td><button class="btn-secondary-cyt" style="padding:3px 8px;font-size:11px;color:var(--cyt-danger);border-color:var(--cyt-danger);" onclick="deleteWaybill('${w.id}')">删除</button></td>
+    </tr>
+  `).join('');
+}
+function filterHistory(kw) { renderHistory(kw); }
+function deleteWaybill(id) {
+  const list = getWaybills().filter(w => w.id !== id);
+  saveWaybills(list);
+  renderHistory();
+  showToast('已删除运单记录', 'warn');
+}
+
+// =============================================
+// MAPPING RULES
+// =============================================
+function renderMappingTable(keyword, targetFilter) {
+  let list = getMappings();
+  if (keyword) list = list.filter(r => r.sourceField.includes(keyword));
+  if (targetFilter) list = list.filter(r => r.targetField === targetFilter);
+  const tbody = document.getElementById('mapping-tbody');
+  const empty = document.getElementById('mapping-empty');
+  if (list.length === 0) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map((r, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><span class="tag tag-orange">${r.sourceField}</span></td>
+      <td><code style="font-size:12px;color:var(--cyt-navy);">${r.targetField}</code></td>
+      <td>${r.targetFieldName}</td>
+      <td><span style="font-size:13px;color:var(--cyt-primary);font-weight:600;">${r.usageCount}</span></td>
+      <td style="font-size:12px;color:var(--cyt-text-secondary);">${r.lastUsed}</td>
+      <td>${r.createdBy}</td>
+      <td><span class="tag ${r.active ? 'tag-green' : 'tag-gray'}">${r.active ? '启用' : '停用'}</span></td>
+      <td>
+        <button class="btn-secondary-cyt" style="padding:3px 8px;font-size:11px;" onclick="toggleMappingStatus('${r.id}')">
+          ${r.active ? '停用' : '启用'}
+        </button>
+        <button class="btn-secondary-cyt" style="padding:3px 8px;font-size:11px;color:var(--cyt-danger);border-color:var(--cyt-danger);margin-left:4px;" onclick="askDeleteMapping('${r.id}', '${r.sourceField}')">删除</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterMapping(kw) { renderMappingTable(kw, document.getElementById('mapping-target-filter').value); }
+function filterMappingTarget(v) { renderMappingTable('', v); }
+
+function toggleMappingStatus(id) {
+  const list = getMappings();
+  const rule = list.find(r => r.id === id);
+  if (rule) { rule.active = !rule.active; saveMappings(list); renderMappingTable(); showToast(rule.active ? '规则已启用' : '规则已停用', 'success'); }
+}
+
+function askDeleteMapping(id, name) {
+  state.pendingDeleteId = id;
+  document.getElementById('delete-mapping-msg').textContent = `确认删除映射规则"${name}"吗？删除后，相关字段识别将不再自动映射。`;
+  openModal('delete-mapping-modal');
+}
+function confirmDeleteMapping() {
+  const list = getMappings().filter(r => r.id !== state.pendingDeleteId);
+  saveMappings(list);
+  closeModal('delete-mapping-modal');
+  renderMappingTable();
+  showToast('映射规则已删除', 'warn');
+  state.pendingDeleteId = null;
+}
+
+function openAddMappingModal() {
+  document.getElementById('new-source-field').value = '';
+  document.getElementById('new-target-field').value = '';
+  openModal('add-mapping-modal');
+}
+function saveNewMapping() {
+  const src = document.getElementById('new-source-field').value.trim();
+  const tgt = document.getElementById('new-target-field').value;
+  if (!src) { showToast('请输入来源字段名称', 'warn'); return; }
+  if (!tgt) { showToast('请选择目标字段', 'warn'); return; }
+  const list = getMappings();
+  const conflict = list.find(r => r.sourceField === src && r.active);
+  if (conflict) {
+    showToast(`"${src}" 已存在映射规则，请先停用旧规则`, 'warn'); return;
+  }
+  list.push({
+    id: 'r' + Date.now(), sourceField: src, targetField: tgt,
+    targetFieldName: TARGET_FIELD_LABELS[tgt] || tgt,
+    usageCount: 0, lastUsed: '-', createdBy: '李调度', active: true
+  });
+  saveMappings(list);
+  closeModal('add-mapping-modal');
+  renderMappingTable();
+  showToast('映射规则已添加', 'success');
+}
+
+// =============================================
+// CONFLICT MODAL
+// =============================================
+function resolveConflict(mode) {
+  closeModal('conflict-modal');
+  if (mode === 'update') { showToast('映射规则已更新', 'success'); }
+  else { showToast('本次识别已应用新规则', 'success'); }
+}
+
+// =============================================
+// STATS & SETTINGS
+// =============================================
+function updateStats() {
+  document.getElementById('stats-saved').textContent = getWaybills().length;
+}
+function updateSettingCounts() {
+  document.getElementById('setting-waybill-count').textContent = getWaybills().length;
+  document.getElementById('setting-rule-count').textContent = getMappings().length;
+}
+function clearAllData() {
+  if (!confirm('确认清空所有本地数据？此操作不可恢复。')) return;
+  localStorage.removeItem(STORAGE_KEYS.waybills);
+  localStorage.removeItem(STORAGE_KEYS.mappings);
+  initData();
+  showToast('本地数据已清空', 'warn');
+  updateSettingCounts();
+}
+
+// =============================================
+// MODAL HELPERS
+// =============================================
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-cyt').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// =============================================
+// TOAST
+// =============================================
+function showToast(msg, type) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  const iconMap = { success: 'bi-check-circle-fill', warn: 'bi-exclamation-triangle-fill', err: 'bi-x-circle-fill' };
+  const colorMap = { success: 'var(--cyt-success)', warn: 'var(--cyt-warning)', err: 'var(--cyt-danger)' };
+  toast.className = 'cyt-toast ' + (type === 'warn' ? 'warn' : type === 'err' ? 'err' : '');
+  toast.innerHTML = `<i class="bi ${iconMap[type]||'bi-info-circle'}" style="color:${colorMap[type]||'var(--cyt-success)'}; font-size:16px;"></i><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.animation = 'fadeOut .3s ease forwards'; setTimeout(() => toast.remove(), 300); }, 2800);
+}
+
+// =============================================
+// INIT
+// =============================================
+document.addEventListener('DOMContentLoaded', () => {
+  initData();
+  showView('create');
+  setCreateMode('upload');
+});
+</script>
+</body>
+</html>
