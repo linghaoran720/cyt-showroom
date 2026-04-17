@@ -459,11 +459,8 @@
 
         <div class="filter-bar">
             <div class="filter-tag active" data-filter="all">全部功能</div>
-            <div class="filter-tag" data-filter="报表中心">报表中心</div>
-            <div class="filter-tag" data-filter="车务中心">车务中心</div>
             <div class="filter-tag" data-filter="智能识别">智能识别</div>
             <div class="filter-tag" data-filter="轮胎管理">轮胎管理</div>
-            <div class="filter-tag" data-filter="费用管理">费用管理</div>
         </div>
 
         <div class="modules-container" id="modulesContainer">
@@ -474,26 +471,6 @@
     <script>
         // 功能数据
         const modules = [
-            {
-                id: "报表中心",
-                name: "报表中心",
-                icon: "📊",
-                desc: "车辆运营报表、油耗分析、数据导出",
-                features: [
-                    { title: "油耗数据确认与变更", path: "报表中心/fuel-analysis-full-export/index.html", date: "2026-04-12" },
-                    { title: "油耗分析-满到满导出", path: "报表中心/fuel-analysis-full-export/index.html", date: "2026-04-12" }
-                ]
-            },
-            {
-                id: "车务中心",
-                name: "车务中心",
-                icon: "🔧",
-                desc: "物料管理、维修保养、ETC、油卡充值",
-                features: [
-                    { title: "物料盘点", path: "车务中心/vehicle-material/material-inventory/prototypes/物料盘点/index.html", date: "2026-03-27" },
-                    { title: "物料入库-补录单价", path: "车务中心/vehicle-material/material-inbound/price-supplement/2604-物料入库支持结算后补录单价-PT/index.html", date: "2026-03-26" }
-                ]
-            },
             {
                 id: "智能识别",
                 name: "智能识别系统",
@@ -510,15 +487,6 @@
                 desc: "轮胎存管、使用跟踪、成本分析",
                 features: [
                     { title: "轮胎管理系统", path: "轮胎管理/Cursor-html/index.html", date: "2026-03-31" }
-                ]
-            },
-            {
-                id: "费用管理",
-                name: "费用管理",
-                icon: "💰",
-                desc: "在途费用、成本核算、费用分析",
-                features: [
-                    { title: "在途费用-完整原型", path: "费用管理/ontheway-expense.html", date: "2026-04-16" }
                 ]
             }
         ];
