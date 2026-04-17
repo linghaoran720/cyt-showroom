@@ -480,8 +480,8 @@
                 icon: "📊",
                 desc: "车辆运营报表、油耗分析、数据导出",
                 features: [
-                    { title: "油耗数据确认与变更", path: "报表中心/油耗分析-满到满导出汇总明细/index.html", date: "2026-04-12" },
-                    { title: "油耗分析-满到满导出", path: "报表中心/油耗分析-满到满导出汇总明细/index.html", date: "2026-04-12" }
+                    { title: "油耗数据确认与变更", path: "报表中心/fuel-analysis-full-export/index.html", date: "2026-04-12" },
+                    { title: "油耗分析-满到满导出", path: "报表中心/fuel-analysis-full-export/index.html", date: "2026-04-12" }
                 ]
             },
             {
@@ -518,7 +518,7 @@
                 icon: "💰",
                 desc: "在途费用、成本核算、费用分析",
                 features: [
-                    { title: "在途费用-完整原型", path: "费用管理/在途费用-完整原型.html", date: "2026-04-16" }
+                    { title: "在途费用-完整原型", path: "费用管理/ontheway-expense.html", date: "2026-04-16" }
                 ]
             }
         ];
@@ -586,8 +586,8 @@
                 alert('该功能原型暂未上线，敬请期待');
                 return;
             }
-            // 相对路径跳转到上一级目录
-            window.open('../' + path, '_blank');
+            // 直接打开路径（GitHub Pages根目录）
+            window.open(path, '_blank');
         }
 
         // 筛选标签点击
